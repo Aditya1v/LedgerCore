@@ -110,9 +110,19 @@ async function userLogoutController(req , res){
   })
 }
 
+/**
+ * - Current User Controller
+ * - GET /api/auth/me
+ */
+async function currentUserController(req, res) {
+  return res.status(200).json({
+    user: req.user,
+  });
+}
 
 module.exports = {
   userRegisterController,
   userLoginController,
-  userLogoutController
+  userLogoutController,
+  currentUserController
 }

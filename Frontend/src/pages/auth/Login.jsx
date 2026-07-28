@@ -1,14 +1,19 @@
 import { useForm } from "react-hook-form";
+import { useContext, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
 
 import AuthLayout from "../../layouts/AuthLayout";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../../validations/authSchema";
 import { loginUser } from "../../services/authService";
-import { useState } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 function Login() {
+
+  const { setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
   // Initialize React Hook Form
   const {
     register,
@@ -28,9 +33,10 @@ function Login() {
     try {
       const response = await loginUser(data);
 
-      console.log("Login Successful");
-      console.log("User:", response.user);
-      console.log("Token:", response.token);
+      setUser(response.user);
+      navigate("/dashboard"); //we use navigate after user , it prevent before rendring of dashboard page.
+      // console.log("User:", response.user);
+      // console.log("Token:", response.token);
     } catch (error) {
       setServerError(error.response?.data?.message || "Something went wrong");
     } finally {
@@ -61,7 +67,7 @@ function Login() {
           error={errors.password?.message}
           {...register("password")}
         />
-        {serverError && <p className="text-red-500 text-sm">{serverError}</p>};
+        {serverError && <p className="text-red-500 text-sm">{serverError}</p>}
         <Button type="submit" disabled={loading}>
           {loading ? "Signing In..." : "Sign In"}
         </Button>
