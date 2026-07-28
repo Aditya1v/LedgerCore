@@ -5,6 +5,8 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../../validations/authSchema";
+import { loginUser } from "../../services/authService";
+import { useState } from "react";
 
 function Login() {
   // Initialize React Hook Form
@@ -16,10 +18,24 @@ function Login() {
   resolver: zodResolver(loginSchema),
 });
 
+const [serverError, setServerError] = useState("");
+
   // Runs when the form is submitted successfully
-  const onSubmit = (data) => {
-    console.log(data);
-  };
+  const onSubmit = async (data) => {
+
+    setServerError("");
+  try {
+    const response = await loginUser(data);
+
+    console.log("Login Successful");
+    console.log("User:", response.user);
+    console.log("Token:", response.token);  
+  } catch (error) {
+setServerError(
+  error.response?.data?.message || "Something went wrong"
+);
+  }
+};
 
   return (
     <AuthLayout>
@@ -49,6 +65,11 @@ function Login() {
           error={errors.password?.message}
           {...register("password")}
         />
+        {serverError && (
+  <p className="text-red-500 text-sm">
+    {serverError}
+  </p>
+)};
 
         <Button type="submit">
           Sign In

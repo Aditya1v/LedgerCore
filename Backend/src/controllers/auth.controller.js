@@ -58,6 +58,7 @@ async function userLoginController(req , res){
     
     return res.status(401).json({
       message: "Email or Password is INVALID"
+      // message: "Invalid email or password"
     })
   }
 
@@ -66,6 +67,7 @@ async function userLoginController(req , res){
   if(!isValidPassword){
     return res.status(401).json({
       message: "Password is Invalid"
+      // message: "Invalid email or password"
     })
   }
 
