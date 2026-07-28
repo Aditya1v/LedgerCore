@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# Node modules
+**/node_modules
+
+# Build folders
+**/dist
+**/build
+
+# Vite
+**/.vite
+
+# Coverage
+**/coverage
+
+# VS Code
+.vscode/
+
+# OS files
+Thumbs.db
