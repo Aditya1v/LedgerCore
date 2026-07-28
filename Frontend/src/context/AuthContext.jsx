@@ -15,19 +15,16 @@ function AuthProvider({ children }) {
         setUser(response.user);
       } catch (error) {
         // User is not logged in. Leave user as null.
-      }finally {
-    setLoading(false);
-  }
+      } finally {
+        setLoading(false);
+      }
 
+      const response = await getCurrentUser();
 
-const response = await getCurrentUser();
-
-
-
-setUser(response.user);
+      setUser(response.user);
     }
-    
-    restoreUser(); 
+
+    restoreUser();
   }, []);
 
   return (
@@ -35,7 +32,7 @@ setUser(response.user);
       value={{
         user,
         setUser,
-        loading
+        loading,
       }}
     >
       {children}
