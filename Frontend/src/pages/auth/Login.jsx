@@ -19,11 +19,13 @@ function Login() {
 });
 
 const [serverError, setServerError] = useState("");
+const [loading, setLoading] = useState(false);
 
   // Runs when the form is submitted successfully
   const onSubmit = async (data) => {
 
     setServerError("");
+    setLoading(true);
   try {
     const response = await loginUser(data);
 
@@ -34,7 +36,9 @@ const [serverError, setServerError] = useState("");
 setServerError(
   error.response?.data?.message || "Something went wrong"
 );
-  }
+  }finally {
+    setLoading(false);
+}
 };
 
   return (
@@ -71,9 +75,12 @@ setServerError(
   </p>
 )};
 
-        <Button type="submit">
-          Sign In
-        </Button>
+        <Button
+    type="submit"
+    disabled={loading}
+>
+    {loading ? "Signing In..." : "Sign In"}
+</Button>
       </form>
     </AuthLayout>
   );
