@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { navigation } from "../constants/navigation";
+import { navigation } from "../../constants/navigation";
 
 function Sidebar() {
   return (

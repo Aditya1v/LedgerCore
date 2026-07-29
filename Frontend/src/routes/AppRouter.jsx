@@ -5,7 +5,7 @@ import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Accounts from "../pages/accounts/Accounts";
 
-import ProtectedRoute from "../components/ProtectedRoute";
+import ProtectedRoute from "../components/layout/ProtectedRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 
