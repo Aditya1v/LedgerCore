@@ -1,77 +1,107 @@
 const accountModel = require("../models/account.model");
 const ledgerModel = require("../models/legder.model");
+const transactionModel = require("../models/transaction.model");
 
 const getDashboardSummaryService = async (user) => {
-  console.log("User ID:", user._id);
+  const [totalAccounts, userAccounts, summary] = await Promise.all([
+    accountModel.countDocuments({
+      user: user._id,
+      status: "ACTIVE",
+    }),
+    accountModel
+      .find({
+        user: user._id,
+        status: "ACTIVE",
+      })
+      .select("_id"),
 
-  const totalAccounts = await accountModel.countDocuments({
-    user: user._id,
-    status: "ACTIVE",
-  });
-
-  console.log("Total Accounts:", totalAccounts);
-  const summary = await ledgerModel.aggregate([
-    {
-      $lookup: {
-        from: "accounts",
-        localField: "account",
-        foreignField: "_id",
-        as: "accountDetails",
+    ledgerModel.aggregate([
+      {
+        $lookup: {
+          from: "accounts",
+          localField: "account",
+          foreignField: "_id",
+          as: "accountDetails",
+        },
       },
-    },
-    {
-      $unwind: "$accountDetails",
-    },
-    {
-      $match: {
-        "accountDetails.user": user._id,
+      {
+        $unwind: "$accountDetails",
       },
-    },
-    {
-      $group: {
-        _id: null,
+      {
+        $match: {
+          "accountDetails.user": user._id,
+        },
+      },
+      {
+        $group: {
+          _id: null,
 
-        totalCredit: {
-          $sum: {
-            $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0],
+          totalCredit: {
+            $sum: {
+              $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0],
+            },
+          },
+
+          totalDebit: {
+            $sum: {
+              $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0],
+            },
           },
         },
+      },
+      {
+        $project: {
+          _id: 0,
 
-        totalDebit: {
-          $sum: {
-            $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0],
+          totalIncome: "$totalCredit",
+
+          totalExpense: "$totalDebit",
+
+          totalBalance: {
+            $subtract: ["$totalCredit", "$totalDebit"],
           },
         },
       },
-    },
-    {
-      $project: {
-        _id: 0,
-
-        totalIncome: "$totalCredit",
-
-        totalExpense: "$totalDebit",
-
-        totalBalance: {
-          $subtract: ["$totalCredit", "$totalDebit"],
-        },
-      },
-    },
+    ]),
   ]);
+
+  const accountIds = userAccounts.map((account) => account._id);
+
+  const recentTransactions = await transactionModel
+    .find({
+      $or: [
+        {
+          fromAccount: {
+            $in: accountIds,
+          },
+        },
+        {
+          toAccount: {
+            $in: accountIds,
+          },
+        },
+      ],
+    })
+    .select("fromAccount toAccount amount status createdAt")
+    .sort({
+      createdAt: -1,
+    })
+    .limit(5)
+    .populate("fromAccount", "currency")
+    .populate("toAccount", "currency");
+
   const financialSummary = summary[0] || {
     totalIncome: 0,
     totalExpense: 0,
     totalBalance: 0,
   };
 
-  console.log(summary);
-  console.log(summary.length);
   return {
     totalBalance: financialSummary.totalBalance,
     totalIncome: financialSummary.totalIncome,
     totalExpense: financialSummary.totalExpense,
     totalAccounts,
-    recentTransactions: [],
+    recentTransactions,
   };
 };
 
