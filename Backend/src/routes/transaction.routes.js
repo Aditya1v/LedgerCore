@@ -4,13 +4,14 @@ const transactionController = require('../controllers/transaction.controller')
 const transactionRoutes = Router();
 const validateRequest = require("../middlewares/validateRequest");
 const {createTransactionSchema} = require("../validations/transaction.validation");
+const asyncHandler = require('../utils/asyncHandler');
 
 /**
  * - POST /api/transactions/
  * - Create a new transaction
  */
 
-transactionRoutes.post('/', authMiddleware.authMiddleware, validateRequest(createTransactionSchema), transactionController.createTransaction)
+transactionRoutes.post('/', authMiddleware.authMiddleware, validateRequest(createTransactionSchema), asyncHandler(transactionController.createTransaction))
 
 
 /**
@@ -18,6 +19,6 @@ transactionRoutes.post('/', authMiddleware.authMiddleware, validateRequest(creat
  * - Create initial funds transaction from system user
  */
 
-transactionRoutes.post('/system/initial-funds', authMiddleware.authSystemUserMiddleware,  transactionController.createInitialFundsTransaction)
+transactionRoutes.post('/system/initial-funds', authMiddleware.authSystemUserMiddleware,  asyncHandler(transactionController.createInitialFundsTransaction))
 
 module.exports = transactionRoutes;
