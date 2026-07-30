@@ -194,14 +194,9 @@ async function createTransaction(req, res) {
     await session.commitTransaction();
   } catch (err) {
     await session.abortTransaction();
-    console.error(err);
-
-    return res.status(500).json({
-      success: false,
-      message: "Transaction failed. Please try again.",
-    });
+    throw err;
   } finally {
-    session.endSession();
+   session.endSession();
   }
 
   /**
@@ -300,14 +295,9 @@ async function createInitialFundsTransaction(req, res) {
     });
   } catch (err) {
     await session.abortTransaction();
-    console.error(err);
-
-    return res.status(500).json({
-      success: false,
-      message: "Initial funds transaction failed.",
-    });
+    throw err;
   } finally {
-    session.endSession();
+   session.endSession();
   }
 }
 

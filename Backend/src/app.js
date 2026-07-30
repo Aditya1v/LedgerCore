@@ -1,6 +1,7 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const cors = require("cors");
+const errorMiddleware = require("./middlewares/error.middleware");
 
 const app = express()
 
@@ -37,6 +38,8 @@ app.use("/api/auth" ,authRouter)
 app.use("/api/accounts" , accountRouter)
 app.use("/api/transactions" , transactionRouter)
 app.use("/api/dashboard", dashboardRoutes);
+
+app.use(errorMiddleware);
 
 
 module.exports = app;
