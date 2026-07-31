@@ -1,4 +1,9 @@
+const logger = require("../utils/logger");
+
 const errorMiddleware = (err, req, res, next) => {
+
+  logger.error(err.stack || err.message);
+  
   const statusCode = err.statusCode || 500;
 
   // Operational errors (AppError)

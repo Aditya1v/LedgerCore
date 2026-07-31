@@ -165,7 +165,7 @@ async function createTransaction(req, res) {
     );
 
     //delaying the credit ledger entry to simulate a long-running transaction
-    await new Promise((resolve) => setTimeout(resolve, 15000));
+    // await new Promise((resolve) => setTimeout(resolve, 15000));
 
     /**
      * 7. Create CREDIT ledger entry for receiver account
