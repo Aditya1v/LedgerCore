@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const AppError = require("../utils/AppError");
+
 
 // Models
 const accountModel = require("../models/account.model");
@@ -43,10 +45,7 @@ async function createTransaction(req, res) {
   const toUserAccount = await accountModel.findById(toAccount);
 
   if (!fromUserAccount || !toUserAccount) {
-    return res.status(400).json({
-      success: false,
-      message: "Sender or receiver account not found",
-    });
+   throw new AppError("Sender or receiver account not found", 400);
   }
 
   /**
@@ -96,10 +95,10 @@ async function createTransaction(req, res) {
     fromUserAccount.status !== "ACTIVE" ||
     toUserAccount.status !== "ACTIVE"
   ) {
-    return res.status(400).json({
-      success: false,
-      message: "Sender or receiver account is not active",
-    });
+    throw new AppError(
+      "Sender or receiver account is not active",
+      400
+    );
   }
 
   /**
@@ -109,10 +108,10 @@ async function createTransaction(req, res) {
   const balance = await fromUserAccount.getBalance();
 
   if (balance < amount) {
-    return res.status(400).json({
-      success: false,
-      message: `Insufficient balance in sender account. Current balance is ${balance} and transaction amount is ${amount}`,
-    });
+    throw new AppError(
+      `Insufficient balance in sender account. Current balance is ${balance} and transaction amount is ${amount}`,
+      400
+   );
   }
 
   /**
@@ -224,10 +223,7 @@ async function createInitialFundsTransaction(req, res) {
   const toUserAccount = await accountModel.findById(toAccount);
 
   if (!toUserAccount) {
-    return res.status(400).json({
-      success: false,
-      message: "Receiver account not found",
-    });
+    throw new AppError("Receiver account not found",400);
   }
 
   const fromUserAccount = await accountModel.findOne({
@@ -235,10 +231,7 @@ async function createInitialFundsTransaction(req, res) {
   });
 
   if (!fromUserAccount) {
-    return res.status(400).json({
-      success: false,
-      message: "System user account not found",
-    });
+    throw new AppError("System user account not found",400);
   }
 
   const session = await mongoose.startSession();
