@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const emailService = require('../services/email.service')
 const tokenblackListModel = require('../models/blackList.model')
 const AppError = require("../utils/AppError");
+const sendResponse = require("../utils/sendResponse");
 
 /** 
 * - User register controller
@@ -28,14 +29,19 @@ async function userRegisterController(req, res){
 
   res.cookie("token" , token)
 
-  res.status(201).json({
-    user:{
-      _id: user._id,
-      email: user.email,
-      name : user.name
-    },
-    token
-  })
+  sendResponse(
+    res,
+    201,
+    "User registered successfully",
+    {
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+      },
+      token,
+    }
+  );
   
   await emailService.sendRegistrationEmail(user.email,user.name)
 
@@ -66,14 +72,19 @@ async function userLoginController(req , res){
 
   res.cookie("token" , token)
 
-  res.status(200).json({
-    user:{
-      _id: user._id,
-      email: user.email,
-      name : user.name
-    },
-    token
-  })
+  sendResponse(
+    res,
+    200,
+    "Login successful",
+    {
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+      },
+      token,
+    }
+  );
 }
 
 /**
@@ -94,9 +105,11 @@ async function userLogoutController(req , res){
   // Clear the cookie
   res.clearCookie("token")
 
-  res.status(200).json({
-    message: "User logged out successfully"
-  })
+  sendResponse(
+    res,
+    200,
+    "User logged out successfully"
+  );
 }
 
 /**
@@ -104,9 +117,12 @@ async function userLogoutController(req , res){
  * - GET /api/auth/me
  */
 async function currentUserController(req, res) {
-  return res.status(200).json({
-    user: req.user,
-  });
+  return sendResponse(
+    res,
+    200,
+    "Current user fetched successfully",
+    req.user
+  );
 }
 
 module.exports = {

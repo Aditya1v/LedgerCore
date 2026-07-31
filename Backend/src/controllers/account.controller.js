@@ -1,5 +1,6 @@
 const accountModel = require('../models/account.model')
 const AppError = require("../utils/AppError");
+const sendResponse = require("../utils/sendResponse");
 
 
 async function createAccountController(req, res){
@@ -9,18 +10,24 @@ async function createAccountController(req, res){
     user: user._id
   })
 
-  res.status(201).json({
+  sendResponse(
+    res,
+    201,
+    "Account created successfully",
     account
-  })
+  );
 
 }
 
 async function getUserAccountsController(req,res){
   const accounts = await accountModel.find({user:req.user._id})
 
-  res.status(200).json({
+  sendResponse(
+    res,
+    200,
+    "Accounts fetched successfully",
     accounts
-  })
+  );
 }
 
 async function getAccountBalanceController(req,res){
@@ -37,10 +44,15 @@ async function getAccountBalanceController(req,res){
 
   const balance = await account.getBalance();
   
-  res.status(200).json({
-    accountId: account._id,
-    balance
-  })
+  sendResponse(
+    res,
+    200,
+    "Balance fetched successfully",
+    {
+      accountId: account._id,
+      balance,
+    }
+  );
 }
 
 module.exports = {createAccountController ,getUserAccountsController , getAccountBalanceController}

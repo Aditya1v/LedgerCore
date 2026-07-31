@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
-const AppError = require("../utils/AppError");
 
+// Utils
+const AppError = require("../utils/AppError");
+const sendResponse = require("../utils/sendResponse");
 
 // Models
 const accountModel = require("../models/account.model");
@@ -58,18 +60,20 @@ async function createTransaction(req, res) {
 
   if (isTransactionAlreadyExists) {
     if (isTransactionAlreadyExists.status === "COMPLETED") {
-      return res.status(200).json({
-        success: true,
-        message: "Transaction already completed",
-        transaction: isTransactionAlreadyExists,
-      });
+      return sendResponse(
+        res,
+        200,
+        "Transaction already completed",
+        isTransactionAlreadyExists
+      );
     }
 
     if (isTransactionAlreadyExists.status === "PENDING") {
-      return res.status(200).json({
-        success: true,
-        message: "Transaction is still pending",
-      });
+      return sendResponse(
+        res,
+        200,
+        "Transaction is still pending"
+      );
     }
 
     if (isTransactionAlreadyExists.status === "FAILED") {
@@ -209,11 +213,12 @@ async function createTransaction(req, res) {
     toAccount,
   );
 
-  return res.status(201).json({
-    success: true,
-    message: "Transaction completed successfully",
-    transaction,
-  });
+  return sendResponse(
+    res,
+    201,
+    "Transaction completed successfully",
+    transaction
+  );
   
 }
 
@@ -281,11 +286,12 @@ async function createInitialFundsTransaction(req, res) {
 
     await session.commitTransaction();
 
-    return res.status(201).json({
-      success: true,
-      message: "Initial funds transaction completed successfully",
-      transaction,
-    });
+    return sendResponse(
+      res,
+      201,
+      "Transaction completed successfully",
+      transaction
+    );
   } catch (err) {
     await session.abortTransaction();
     throw err;
