@@ -1,4 +1,5 @@
 const accountModel = require('../models/account.model')
+const AppError = require("../utils/AppError");
 
 
 async function createAccountController(req, res){
@@ -31,9 +32,7 @@ async function getAccountBalanceController(req,res){
   })
 
   if(!account){
-    return res.status(404).json({
-      message: "Account not found"
-    })
+    throw new AppError("Account not found",404);
   }
 
   const balance = await account.getBalance();

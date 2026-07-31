@@ -2,6 +2,7 @@ const userModel = require('../models/user.model')
 const jwt = require('jsonwebtoken')
 const emailService = require('../services/email.service')
 const tokenblackListModel = require('../models/blackList.model')
+const AppError = require("../utils/AppError");
 
 /** 
 * - User register controller
@@ -16,10 +17,7 @@ async function userRegisterController(req, res){
   })
 
   if(isExists){
-    return res.status(422).json({
-      message: "User already exists with email",
-      status: "failed"
-    })
+    throw new AppError("User already exists with this email", 422);
   }
 
   const user = await userModel.create({
@@ -55,20 +53,13 @@ async function userLoginController(req , res){
   const user = await userModel.findOne({email}).select("+password")
 
   if(!user){
-    
-    return res.status(401).json({
-      message: "Email or Password is INVALID"
-      // message: "Invalid email or password"
-    })
+    throw new AppError("Invalid email or password", 401);
   }
 
   const isValidPassword = await user.comparePassword(password)
 
   if(!isValidPassword){
-    return res.status(401).json({
-      message: "Password is Invalid"
-      // message: "Invalid email or password"
-    })
+    throw new AppError("Invalid email or password",401);
   }
 
   const token = jwt.sign({userID:user._id} , process.env.JWT_SECRET, {expiresIn:"3d"})
@@ -94,9 +85,7 @@ async function userLogoutController(req , res){
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1]
 
   if(!token){
-    return res.status(400).json({
-      message: "User is not logged in"
-    })
+    throw new AppError("User is not logged in",400);
   }
 
   // Add the token to the blacklist
