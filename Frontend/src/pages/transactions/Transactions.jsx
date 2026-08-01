@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getTransactions } from "../../services/transactionService";
 import Loader from "../../components/ui/Loader";
 import EmptyState from "../../components/ui/EmptyState";
+import TransactionCard from "../../components/transactions/TransactionCard";
 
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
@@ -37,16 +38,35 @@ function Transactions() {
   }
 
   return (
-    <div>
-      <h1 className="text-5xl font-bold text-white">
-        Transactions
-      </h1>
+  <div>
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-5xl font-bold text-white">
+          Transactions
+        </h1>
 
-      <p className="mt-2 text-slate-400">
-        Total Transactions: {transactions.length}
-      </p>
+        <p className="mt-2 text-slate-400">
+          Total Transactions: {transactions.length}
+        </p>
+      </div>
+
+      <button
+        className="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl text-white font-semibold transition"
+      >
+        + Transfer Money
+      </button>
     </div>
-  );
+
+    <div className="grid gap-6 mt-8">
+      {transactions.map((transaction) => (
+        <TransactionCard
+          key={transaction._id}
+          transaction={transaction}
+        />
+      ))}
+    </div>
+  </div>
+);
 }
 
 export default Transactions;
