@@ -7,4 +7,8 @@ export const navigation = [
     name: "Accounts",
     path: "/accounts",
   },
+  {
+    name: "Transactions",
+    path: "/transactions",
+  },
 ];

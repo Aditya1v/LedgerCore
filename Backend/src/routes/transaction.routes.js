@@ -7,6 +7,16 @@ const {createTransactionSchema} = require("../validations/transaction.validation
 const asyncHandler = require('../utils/asyncHandler');
 
 /**
+ * - GET /api/transactions
+ * - Get all transactions of the logged-in user
+ */
+transactionRoutes.get(
+  "/",
+  authMiddleware.authMiddleware,
+  asyncHandler(transactionController.getUserTransactions)
+)
+
+/**
  * - POST /api/transactions/
  * - Create a new transaction
  */

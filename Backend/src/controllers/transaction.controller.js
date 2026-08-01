@@ -300,7 +300,49 @@ async function createInitialFundsTransaction(req, res) {
   }
 }
 
+async function getUserTransactions(req, res) {
+  // Get all user accounts
+  const accounts = await accountModel
+    .find({
+      user: req.user._id,
+      status: "ACTIVE",
+    })
+    .select("_id");
+
+  const accountIds = accounts.map((account) => account._id);
+
+  // Fetch transactions
+  const transactions = await transactionModel
+    .find({
+      $or: [
+        {
+          fromAccount: {
+            $in: accountIds,
+          },
+        },
+        {
+          toAccount: {
+            $in: accountIds,
+          },
+        },
+      ],
+    })
+    .populate("fromAccount", "name currency")
+    .populate("toAccount", "name currency")
+    .sort({
+      createdAt: -1,
+    });
+
+  return sendResponse(
+    res,
+    200,
+    "Transactions fetched successfully",
+    transactions
+  );
+}
+
 module.exports = {
   createTransaction,
   createInitialFundsTransaction,
+  getUserTransactions
 };
