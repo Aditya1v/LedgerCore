@@ -2,6 +2,8 @@ const express = require('express')
 const authMiddleware = require('../middlewares/auth.middleware')
 const accountController = require('../controllers/account.controller')
 const asyncHandler = require("../utils/asyncHandler");
+const { createAccountSchema } = require("../validations/account.validation");
+const validateRequest = require("../middlewares/validateRequest");
 
 const router = express.Router()
 
@@ -11,7 +13,7 @@ const router = express.Router()
  * - Create a new account
  * - Protected Route
  */
-router.post("/",authMiddleware.authMiddleware , asyncHandler(accountController.createAccountController))
+router.post("/",authMiddleware.authMiddleware , validateRequest(createAccountSchema),asyncHandler(accountController.createAccountController))
 
 /**
  * - GET /api/accounts/

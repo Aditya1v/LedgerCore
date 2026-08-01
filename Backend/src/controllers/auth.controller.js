@@ -117,6 +117,7 @@ async function userLogoutController(req , res){
  * - GET /api/auth/me
  */
 async function currentUserController(req, res) {
+  res.set("Cache-Control", "no-store");
   return sendResponse(
     res,
     200,

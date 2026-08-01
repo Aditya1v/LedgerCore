@@ -28,13 +28,19 @@ function Login() {
 
   // Runs when the form is submitted successfully
   const onSubmit = async (data) => {
+
+
     setServerError("");
     setLoading(true);
     try {
       const response = await loginUser(data);
 
-      setUser(response.user);
+
+      setUser(response.data.user);
+
+
       navigate("/dashboard"); //we use navigate after user , it prevent before rendring of dashboard page.
+
       // console.log("User:", response.user);
       // console.log("Token:", response.token);
     } catch (error) {

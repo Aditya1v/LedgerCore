@@ -4,6 +4,7 @@ const cors = require("cors");
 const errorMiddleware = require("./middlewares/error.middleware");
 
 const app = express()
+app.disable("etag");
 
 app.use(
   cors({

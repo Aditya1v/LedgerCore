@@ -3,7 +3,7 @@ import { Navigate,Outlet } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute() {
   const { user, loading } = useContext(AuthContext);
 
 

@@ -2,7 +2,7 @@ import Card from "../ui/Card";
 import TransactionItem from "../common/TransactionItem";
 
 function RecentTransactions({ transactions }) {
-  console.log(transactions[0]);
+  // console.log(transactions[0]);
   return (
     <Card>
       <div className="flex items-center justify-between">

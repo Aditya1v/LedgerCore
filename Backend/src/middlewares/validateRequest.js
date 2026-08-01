@@ -1,21 +1,19 @@
+const AppError = require("../utils/AppError");
+
 function validateRequest(schema) {
   return (req, res, next) => {
-    const { error, value } = schema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
+    const result = schema.safeParse(req.body);
 
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: error.details.map((detail) => detail.message),
-      });
+    if (!result.success) {
+      return next(
+        new AppError(
+          result.error.issues.map((issue) => issue.message).join(", "),
+          400
+        )
+      );
     }
 
-    // Replace req.body with sanitized data
-    req.body = value;
-
+    req.body = result.data;
     next();
   };
 }

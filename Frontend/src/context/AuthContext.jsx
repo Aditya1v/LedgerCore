@@ -1,6 +1,7 @@
-import { createContext, useState, useEffect } from "react";
+import {  useState, useEffect } from "react";
+import { AuthContext } from "./AuthContext";
 import { getCurrentUser } from "../services/authService";
-export const AuthContext = createContext();
+
 
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -12,20 +13,18 @@ function AuthProvider({ children }) {
       try {
         const response = await getCurrentUser();
 
-        setUser(response.user);
-      } catch (error) {
+        setUser(response.data);
+      } catch {
         // User is not logged in. Leave user as null.
+        setUser(null);
       } finally {
         setLoading(false);
       }
-
-      const response = await getCurrentUser();
-
-      setUser(response.user);
+      // const response = await getCurrentUser();
+      // setUser(response.user);
     }
-
     restoreUser();
-  }, []);
+  },[]);
 
   return (
     <AuthContext.Provider
