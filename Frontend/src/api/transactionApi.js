@@ -5,7 +5,10 @@ export const createTransactionApi = async (data) => {
   return response.data;
 };
 
-export const getTransactionsApi = async () => {
-  const response = await api.get("/transactions");
+export const getTransactionsApi = async (params = {}) => {
+  const response = await api.get("/transactions", {
+    params,
+  });
+
   return response.data;
 };

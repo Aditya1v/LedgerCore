@@ -293,7 +293,16 @@ async function createInitialFundsTransaction(req, res) {
 }
 
 async function getUserTransactions(req, res) {
-  // Get all user accounts
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const search = req.query.search || "";
+  const direction = req.query.direction || "";
+  const category = req.query.category || "";
+  const sort = req.query.sort || "latest";
+
+  const skip = (page - 1) * limit;
+
+  // User accounts
   const accounts = await accountModel
     .find({
       user: req.user._id,
@@ -303,43 +312,104 @@ async function getUserTransactions(req, res) {
 
   const accountIds = accounts.map((account) => account._id);
 
-  // Fetch transactions
+  const query = {
+    status: "COMPLETED",
+    $or: [
+      {
+        fromAccount: {
+          $in: accountIds,
+        },
+      },
+      {
+        toAccount: {
+          $in: accountIds,
+        },
+      },
+    ],
+  };
+
+  if (category) {
+    query.category = category;
+  }
+
+  if (search) {
+    query.$or = [
+      ...(query.$or || []),
+      {
+        merchant: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+      {
+        description: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+      {
+        category: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+    ];
+  }
+
+  let sortQuery = {};
+
+  switch (sort) {
+    case "oldest":
+      sortQuery = { createdAt: 1 };
+      break;
+
+    case "amount_asc":
+      sortQuery = { amount: 1 };
+      break;
+
+    case "amount_desc":
+      sortQuery = { amount: -1 };
+      break;
+
+    default:
+      sortQuery = { createdAt: -1 };
+  }
+
   const transactions = await transactionModel
-    .find({
-      $or: [
-        {
-          fromAccount: {
-            $in: accountIds,
-          },
-        },
-        {
-          toAccount: {
-            $in: accountIds,
-          },
-        },
-      ],
-    })
+    .find(query)
     .populate("fromAccount", "name currency")
     .populate("toAccount", "name currency")
-    .sort({
-      createdAt: -1,
-    });
-  const formattedTransactions = transactions.map((transaction) => {
-    const isIncoming = accountIds.some(
-      (id) => id.toString() === transaction.toAccount._id.toString(),
-    );
+    .sort(sortQuery)
+    .skip(skip)
+    .limit(limit);
 
-    return {
-      ...transaction.toObject(),
-      direction: isIncoming ? "IN" : "OUT",
-    };
+  const formattedTransactions = transactions
+    .map((transaction) => {
+      const isIncoming = accountIds.some(
+        (id) => id.toString() === transaction.toAccount._id.toString(),
+      );
+
+      return {
+        ...transaction.toObject(),
+        direction: isIncoming ? "IN" : "OUT",
+      };
+    })
+    .filter((transaction) => {
+      if (!direction) return true;
+      return transaction.direction === direction;
+    });
+
+  const totalTransactions = await transactionModel.countDocuments(query);
+
+  return sendResponse(res, 200, "Transactions fetched successfully", {
+    transactions: formattedTransactions,
+    pagination: {
+      page,
+      limit,
+      totalTransactions,
+      totalPages: Math.ceil(totalTransactions / limit),
+    },
   });
-  return sendResponse(
-    res,
-    200,
-    "Transactions fetched successfully",
-    formattedTransactions,
-  );
 }
 
 module.exports = {
