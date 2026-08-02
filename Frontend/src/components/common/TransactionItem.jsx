@@ -2,11 +2,10 @@ import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { formatCurrency } from "../../utils/formatCurrency";
 
 function TransactionItem({ transaction }) {
-  const isIncome = transaction.type === "income";
+  const isIncome = transaction.direction === "IN";
 
   return (
     <div className="flex items-center justify-between py-4">
-      {/* Left Section */}
       <div className="flex items-center gap-4">
         <div
           className={`rounded-xl p-3 ${
@@ -30,16 +29,15 @@ function TransactionItem({ transaction }) {
 
         <div>
           <h3 className="font-medium text-slate-100">
-            {transaction.title}
+            {transaction.category}
           </h3>
 
           <p className="text-sm text-slate-400">
-            {transaction.type}
+            {transaction.transactionType}
           </p>
         </div>
       </div>
 
-      {/* Amount */}
       <p
         className={`font-semibold ${
           isIncome

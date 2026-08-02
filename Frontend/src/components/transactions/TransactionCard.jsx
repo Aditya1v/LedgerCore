@@ -1,7 +1,7 @@
 import { ArrowUpRight, ArrowDownLeft } from "lucide-react";
 
 function TransactionCard({ transaction }) {
-  const isCredit = transaction.transactionType === "DEPOSIT";
+  const isCredit = transaction.direction === "IN";
 
   return (
     <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg hover:border-blue-500 transition-all">

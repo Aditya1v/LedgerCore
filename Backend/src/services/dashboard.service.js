@@ -82,13 +82,27 @@ const getDashboardSummaryService = async (user) => {
         },
       ],
     })
-    .select("fromAccount toAccount amount status createdAt")
+    .select(
+      "fromAccount toAccount amount status createdAt category transactionType",
+    )
     .sort({
       createdAt: -1,
     })
     .limit(5)
     .populate("fromAccount", "currency")
     .populate("toAccount", "currency");
+
+  const recentTransactionsWithDirection = recentTransactions.map((tx) => {
+    const transaction = tx.toObject();
+
+    transaction.direction = accountIds.some((id) =>
+      id.equals(transaction.toAccount._id),
+    )
+      ? "IN"
+      : "OUT";
+
+    return transaction;
+  });
 
   const financialSummary = summary[0] || {
     totalIncome: 0,
@@ -101,7 +115,7 @@ const getDashboardSummaryService = async (user) => {
     totalIncome: financialSummary.totalIncome,
     totalExpense: financialSummary.totalExpense,
     totalAccounts,
-    recentTransactions,
+    recentTransactions: recentTransactionsWithDirection,
   };
 };
 

@@ -47,7 +47,7 @@ async function createTransaction(req, res) {
   const toUserAccount = await accountModel.findById(toAccount);
 
   if (!fromUserAccount || !toUserAccount) {
-   throw new AppError("Sender or receiver account not found", 400);
+    throw new AppError("Sender or receiver account not found", 400);
   }
 
   /**
@@ -64,16 +64,12 @@ async function createTransaction(req, res) {
         res,
         200,
         "Transaction already completed",
-        isTransactionAlreadyExists
+        isTransactionAlreadyExists,
       );
     }
 
     if (isTransactionAlreadyExists.status === "PENDING") {
-      return sendResponse(
-        res,
-        200,
-        "Transaction is still pending"
-      );
+      return sendResponse(res, 200, "Transaction is still pending");
     }
 
     if (isTransactionAlreadyExists.status === "FAILED") {
@@ -99,10 +95,7 @@ async function createTransaction(req, res) {
     fromUserAccount.status !== "ACTIVE" ||
     toUserAccount.status !== "ACTIVE"
   ) {
-    throw new AppError(
-      "Sender or receiver account is not active",
-      400
-    );
+    throw new AppError("Sender or receiver account is not active", 400);
   }
 
   /**
@@ -114,8 +107,8 @@ async function createTransaction(req, res) {
   if (balance < amount) {
     throw new AppError(
       `Insufficient balance in sender account. Current balance is ${balance} and transaction amount is ${amount}`,
-      400
-   );
+      400,
+    );
   }
 
   /**
@@ -199,7 +192,7 @@ async function createTransaction(req, res) {
     await session.abortTransaction();
     throw err;
   } finally {
-   session.endSession();
+    session.endSession();
   }
 
   /**
@@ -217,9 +210,8 @@ async function createTransaction(req, res) {
     res,
     201,
     "Transaction completed successfully",
-    transaction
+    transaction,
   );
-  
 }
 
 async function createInitialFundsTransaction(req, res) {
@@ -228,7 +220,7 @@ async function createInitialFundsTransaction(req, res) {
   const toUserAccount = await accountModel.findById(toAccount);
 
   if (!toUserAccount) {
-    throw new AppError("Receiver account not found",400);
+    throw new AppError("Receiver account not found", 400);
   }
 
   const fromUserAccount = await accountModel.findOne({
@@ -236,7 +228,7 @@ async function createInitialFundsTransaction(req, res) {
   });
 
   if (!fromUserAccount) {
-    throw new AppError("System user account not found",400);
+    throw new AppError("System user account not found", 400);
   }
 
   const session = await mongoose.startSession();
@@ -290,13 +282,13 @@ async function createInitialFundsTransaction(req, res) {
       res,
       201,
       "Transaction completed successfully",
-      transaction
+      transaction,
     );
   } catch (err) {
     await session.abortTransaction();
     throw err;
   } finally {
-   session.endSession();
+    session.endSession();
   }
 }
 
@@ -332,17 +324,26 @@ async function getUserTransactions(req, res) {
     .sort({
       createdAt: -1,
     });
+  const formattedTransactions = transactions.map((transaction) => {
+    const isIncoming = accountIds.some(
+      (id) => id.toString() === transaction.toAccount._id.toString(),
+    );
 
+    return {
+      ...transaction.toObject(),
+      direction: isIncoming ? "IN" : "OUT",
+    };
+  });
   return sendResponse(
     res,
     200,
     "Transactions fetched successfully",
-    transactions
+    formattedTransactions,
   );
 }
 
 module.exports = {
   createTransaction,
   createInitialFundsTransaction,
-  getUserTransactions
+  getUserTransactions,
 };
