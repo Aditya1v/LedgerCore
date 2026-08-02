@@ -5,6 +5,11 @@ export const loginUser = async (userData) => {
   return response.data;
 };
 
+export const registerUser = async (userData) => {
+  const response = await api.post("/auth/register", userData);
+  return response.data;
+};
+
 export const getCurrentUser = async () => {
   const response = await api.get("/auth/me");
   return response.data;
@@ -15,7 +20,12 @@ export const logoutUser = async () => {
   return response.data;
 };
 
-export const registerUser = async (userData) => {
-  const response = await api.post("/auth/register", userData);
+export const updateProfile = async (data) => {
+  const response = await api.put("/auth/profile", data);
+  return response.data;
+};
+
+export const changePassword = async (data) => {
+  const response = await api.put("/auth/change-password", data);
   return response.data;
 };

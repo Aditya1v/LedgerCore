@@ -4,13 +4,13 @@ import Sidebar from "../components/layout/Sidebar";
 
 function DashboardLayout() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-950">
       <Navbar />
 
       <div className="flex">
         <Sidebar />
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 bg-slate-950 p-8">
           <Outlet />
         </main>
       </div>

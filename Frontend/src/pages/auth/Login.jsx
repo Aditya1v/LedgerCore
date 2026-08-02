@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { useContext, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 import AuthLayout from "../../layouts/AuthLayout";
 import Input from "../../components/ui/Input";
