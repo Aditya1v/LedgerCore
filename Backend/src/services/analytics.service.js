@@ -8,79 +8,153 @@ async function getAnalytics(user) {
       status: "ACTIVE",
     })
     .select("_id");
+
   const accountIds = accounts.map((account) => account._id);
-  const monthlyData = await transactionModel.aggregate([
-    {
-      $match: {
-        $or: [
-          {
-            fromAccount: {
-              $in: accountIds,
+
+  const [monthlyData, transactionStats] = await Promise.all([
+    transactionModel.aggregate([
+      {
+        $match: {
+          $or: [
+            {
+              fromAccount: {
+                $in: accountIds,
+              },
+            },
+            {
+              toAccount: {
+                $in: accountIds,
+              },
+            },
+          ],
+          status: "COMPLETED",
+        },
+      },
+
+      {
+        $project: {
+          month: {
+            $dateToString: {
+              format: "%Y-%m",
+              date: "$createdAt",
             },
           },
-          {
-            toAccount: {
-              $in: accountIds,
+          amount: 1,
+          fromAccount: 1,
+          toAccount: 1,
+        },
+      },
+
+      {
+        $group: {
+          _id: "$month",
+
+          income: {
+            $sum: {
+              $cond: [
+                { $in: ["$toAccount", accountIds] },
+                "$amount",
+                0,
+              ],
             },
           },
-        ],
-        status: "COMPLETED",
-      },
-    },
 
-    {
-      $project: {
-        month: {
-          $dateToString: {
-            format: "%Y-%m",
-            date: "$createdAt",
+          expense: {
+            $sum: {
+              $cond: [
+                { $in: ["$fromAccount", accountIds] },
+                "$amount",
+                0,
+              ],
+            },
           },
         },
-
-        amount: 1,
-        fromAccount: 1,
-        toAccount: 1,
       },
-    },
 
-    {
-      $group: {
-        _id: "$month",
+      {
+        $project: {
+          _id: 0,
+          month: "$_id",
+          income: 1,
+          expense: 1,
+        },
+      },
 
-        income: {
-          $sum: {
-            $cond: [
-              {
-                $in: ["$toAccount", accountIds],
+      {
+        $sort: {
+          month: 1,
+        },
+      },
+    ]),
+
+    transactionModel.aggregate([
+      {
+        $match: {
+          $or: [
+            {
+              fromAccount: {
+                $in: accountIds,
               },
-              "$amount",
-              0,
-            ],
-          },
-        },
-
-        expense: {
-          $sum: {
-            $cond: [
-              {
-                $in: ["$fromAccount", accountIds],
+            },
+            {
+              toAccount: {
+                $in: accountIds,
               },
-              "$amount",
-              0,
-            ],
+            },
+          ],
+          status: "COMPLETED",
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+
+          transactionCount: {
+            $sum: 1,
+          },
+
+          averageTransaction: {
+            $avg: "$amount",
+          },
+
+          largestIncome: {
+            $max: {
+              $cond: [
+                { $in: ["$toAccount", accountIds] },
+                "$amount",
+                0,
+              ],
+            },
+          },
+
+          largestExpense: {
+            $max: {
+              $cond: [
+                { $in: ["$fromAccount", accountIds] },
+                "$amount",
+                0,
+              ],
+            },
           },
         },
       },
-    },
-
-    {
-      $sort: {
-        _id: 1,
-      },
-    },
+    ]),
   ]);
+
+  const stats = transactionStats[0] || {
+    transactionCount: 0,
+    averageTransaction: 0,
+    largestIncome: 0,
+    largestExpense: 0,
+  };
+
   return {
     monthlyData,
+    transactionCount: stats.transactionCount,
+    averageTransaction: Math.round(stats.averageTransaction),
+    largestIncome: stats.largestIncome,
+    largestExpense: stats.largestExpense,
   };
 }
 

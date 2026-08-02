@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import Accounts from "../pages/accounts/Accounts";
+import Analytics from "../pages/analytics/Analytics";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
-import Accounts from "../pages/accounts/Accounts";
 import Transactions from "../pages/transactions/Transactions";
 
 import ProtectedRoute from "../components/layout/ProtectedRoute";
@@ -25,6 +26,7 @@ function AppRouter() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/transactions" element={<Transactions />} />
+            <Route path="/analytics" element={<Analytics />} />
           </Route>
         </Route>
       </Routes>
