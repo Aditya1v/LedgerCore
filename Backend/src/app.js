@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser')
 const cors = require("cors");
 const errorMiddleware = require("./middlewares/error.middleware");
 
+
 const app = express()
 app.disable("etag");
 
@@ -24,6 +25,7 @@ const authRouter = require('./routes/auth.routes')
 const accountRouter =  require('./routes/account.routes')
 const transactionRouter = require('./routes/transaction.routes')
 const dashboardRoutes = require('./routes/dashboard.routes')
+const analyticsRoutes = require("./routes/analytics.routes");
 
 
 //dummy route for testing
@@ -39,6 +41,7 @@ app.use("/api/auth" ,authRouter)
 app.use("/api/accounts" , accountRouter)
 app.use("/api/transactions" , transactionRouter)
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.use(errorMiddleware);
 
