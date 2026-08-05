@@ -7,6 +7,7 @@ import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Transactions from "../pages/transactions/Transactions";
 import Profile from "../pages/profile/Profile";
+import Settings from "../pages/settings/Settings";
 
 import ProtectedRoute from "../components/layout/ProtectedRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -25,6 +26,7 @@ function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/transactions" element={<Transactions />} />

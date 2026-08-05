@@ -4,6 +4,7 @@ const { authMiddleware } = require("../middlewares/auth.middleware");
 const asyncHandler = require("../utils/asyncHandler");
 
 const router = express.Router();
+console.log("✅ auth.routes loaded");
 
 /* POST /api/auth/register */
 router.post("/register", asyncHandler(authController.userRegisterController));
@@ -17,6 +18,7 @@ router.get(
   authMiddleware,
   asyncHandler(authController.currentUserController)
 );
+console.log("✅ /me route registered");
 
 /* PUT /api/auth/profile */
 router.put(

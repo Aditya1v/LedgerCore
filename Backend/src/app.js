@@ -26,6 +26,7 @@ const accountRouter =  require('./routes/account.routes')
 const transactionRouter = require('./routes/transaction.routes')
 const dashboardRoutes = require('./routes/dashboard.routes')
 const analyticsRoutes = require("./routes/analytics.routes");
+const settingsRoutes = require("./routes/settings.routes");
 
 
 //dummy route for testing
@@ -42,6 +43,7 @@ app.use("/api/accounts" , accountRouter)
 app.use("/api/transactions" , transactionRouter)
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/settings", settingsRoutes);
 
 app.use(errorMiddleware);
 

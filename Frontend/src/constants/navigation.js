@@ -4,6 +4,10 @@ export const navigation = [
     path: "/profile",
   },
   {
+    name: "Settings",
+    path: "/settings",
+  },
+  {
     name: "Dashboard",
     path: "/dashboard",
   },
@@ -19,5 +23,4 @@ export const navigation = [
     name: "Transactions",
     path: "/transactions",
   },
-  
 ];
