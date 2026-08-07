@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { generateTransactionReceipt } from "../../utils/generateTransactionReceipt";
 
 function DetailRow({ label, value, valueClass = "" }) {
   return (
@@ -11,6 +12,8 @@ function DetailRow({ label, value, valueClass = "" }) {
 }
 
 function TransactionDetailsModal({ isOpen, onClose, transaction, loading }) {
+  const [copied, setCopied] = useState(false);
+
   if (!isOpen) return null;
 
   if (loading) {
@@ -23,7 +26,6 @@ function TransactionDetailsModal({ isOpen, onClose, transaction, loading }) {
 
   if (!transaction) return null;
 
-  const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     await navigator.clipboard.writeText(transaction._id);
 
@@ -41,6 +43,12 @@ function TransactionDetailsModal({ isOpen, onClose, transaction, loading }) {
 
         <div className="flex items-center justify-between border-b border-slate-800 px-8 py-6 flex-shrink-0">
           <h2 className="text-3xl font-bold text-white">Transaction Details</h2>
+          <button
+            onClick={() => generateTransactionReceipt(transaction)}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+          >
+            Download PDF
+          </button>
 
           <button
             onClick={onClose}
