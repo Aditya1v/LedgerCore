@@ -412,8 +412,23 @@ async function getUserTransactions(req, res) {
   });
 }
 
+async function getTransactionDetails(req, res) {
+  const transaction = await transactionService.getTransactionDetailsService(
+    req.params.id,
+    req.user
+  );
+
+  return sendResponse(
+    res,
+    200,
+    "Transaction fetched successfully",
+    transaction
+  );
+}
+
 module.exports = {
   createTransaction,
   createInitialFundsTransaction,
   getUserTransactions,
+  getTransactionDetails,
 };

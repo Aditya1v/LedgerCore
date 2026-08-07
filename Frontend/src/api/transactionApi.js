@@ -12,3 +12,8 @@ export const getTransactionsApi = async (params = {}) => {
 
   return response.data;
 };
+
+export const getTransactionDetailsApi = async (transactionId) => {
+  const response = await api.get(`/transactions/${transactionId}`);
+  return response.data;
+};

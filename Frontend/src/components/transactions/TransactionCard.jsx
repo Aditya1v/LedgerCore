@@ -1,10 +1,10 @@
 import { ArrowUpRight, ArrowDownLeft } from "lucide-react";
 
-function TransactionCard({ transaction }) {
+function TransactionCard({ transaction,  onClick }) {
   const isCredit = transaction.direction === "IN";
 
   return (
-    <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg hover:border-blue-500 transition-all">
+    <div onClick={() => onClick(transaction._id)} className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg hover:border-blue-500 transition-all cursor-pointer">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div

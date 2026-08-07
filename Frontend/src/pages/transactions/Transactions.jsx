@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
-import { getTransactions } from "../../services/transactionService";
+import { getTransactions, getTransactionDetails, } from "../../services/transactionService";
 
 import Loader from "../../components/ui/Loader";
 import EmptyState from "../../components/ui/EmptyState";
 import TransactionCard from "../../components/transactions/TransactionCard";
 import TransferMoneyModal from "../../components/transactions/TransferMoneyModal";
+import TransactionDetailsModal from "../../components/transactions/TransactionDetailsModal";
 
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [pagination, setPagination] = useState({});
+
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
@@ -20,6 +25,21 @@ function Transactions() {
   const [category, setCategory] = useState("");
   const [direction, setDirection] = useState("");
   const [sort, setSort] = useState("latest");
+
+  const handleTransactionClick = async (transactionId) => {
+    try {
+      setLoadingDetails(true);
+
+      const transaction = await getTransactionDetails(transactionId);
+
+      setSelectedTransaction(transaction);
+      setIsDetailsOpen(true);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
@@ -55,9 +75,7 @@ function Transactions() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-5xl font-bold text-white">
-            Transactions
-          </h1>
+          <h1 className="text-5xl font-bold text-white">Transactions</h1>
 
           <p className="mt-2 text-slate-400">
             Total Transactions: {pagination.totalTransactions || 0}
@@ -75,7 +93,6 @@ function Transactions() {
       {/* Filters */}
 
       <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-
         <input
           type="text"
           placeholder="Search..."
@@ -97,9 +114,7 @@ function Transactions() {
         >
           <option value="">All Categories</option>
           <option value="Transfer">Transfer</option>
-          <option value="Initial Funding">
-            Initial Funding
-          </option>
+          <option value="Initial Funding">Initial Funding</option>
         </select>
 
         <select
@@ -124,12 +139,8 @@ function Transactions() {
         >
           <option value="latest">Latest</option>
           <option value="oldest">Oldest</option>
-          <option value="amount_desc">
-            Highest Amount
-          </option>
-          <option value="amount_asc">
-            Lowest Amount
-          </option>
+          <option value="amount_desc">Highest Amount</option>
+          <option value="amount_asc">Lowest Amount</option>
         </select>
       </div>
 
@@ -148,6 +159,7 @@ function Transactions() {
             <TransactionCard
               key={transaction._id}
               transaction={transaction}
+              onClick={handleTransactionClick}
             />
           ))}
         </div>
@@ -156,7 +168,6 @@ function Transactions() {
       {/* Pagination */}
 
       <div className="mt-8 flex items-center justify-center gap-4">
-
         <button
           disabled={page === 1}
           onClick={() => setPage((prev) => prev - 1)}
@@ -166,8 +177,7 @@ function Transactions() {
         </button>
 
         <span className="text-slate-300">
-          Page {pagination.page || 1} of{" "}
-          {pagination.totalPages || 1}
+          Page {pagination.page || 1} of {pagination.totalPages || 1}
         </span>
 
         <button
@@ -185,6 +195,14 @@ function Transactions() {
         isOpen={openModal}
         onClose={() => setOpenModal(false)}
         onTransactionCreated={fetchTransactions}
+      />
+
+      <TransactionDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        transaction={selectedTransaction}
+        loading={loadingDetails}
+
       />
     </div>
   );

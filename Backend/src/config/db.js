@@ -10,6 +10,7 @@ async function connectDb(){
   })
   .catch(err=>{
     console.log("Error connecting to DB")
+    console.error(err);
     process.exit(1)
     
   })

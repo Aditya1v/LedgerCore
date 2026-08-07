@@ -1,34 +1,53 @@
-const {Router} = require('express')
-const authMiddleware = require('../middlewares/auth.middleware')
-const transactionController = require('../controllers/transaction.controller')
-const transactionRoutes = Router();
+const { Router } = require("express");
+const {
+  authMiddleware,
+  authSystemUserMiddleware,
+} = require("../middlewares/auth.middleware");
+
+const transactionController = require("../controllers/transaction.controller");
 const validateRequest = require("../middlewares/validateRequest");
-const {createTransactionSchema} = require("../validations/transaction.validation");
-const asyncHandler = require('../utils/asyncHandler');
+const {
+  createTransactionSchema,
+} = require("../validations/transaction.validation");
+const asyncHandler = require("../utils/asyncHandler");
+
+const transactionRoutes = Router();
 
 /**
- * - GET /api/transactions
- * - Get all transactions of the logged-in user
+ * GET /api/transactions
  */
 transactionRoutes.get(
   "/",
-  authMiddleware.authMiddleware,
+  authMiddleware,
   asyncHandler(transactionController.getUserTransactions)
-)
+);
 
 /**
- * - POST /api/transactions/
- * - Create a new transaction
+ * GET /api/transactions/:id
  */
-
-transactionRoutes.post('/', authMiddleware.authMiddleware, validateRequest(createTransactionSchema), asyncHandler(transactionController.createTransaction))
-
+transactionRoutes.get(
+  "/:id",
+  authMiddleware,
+  asyncHandler(transactionController.getTransactionDetails)
+);
 
 /**
- * - POST /api/transactions/system/inital-funds
- * - Create initial funds transaction from system user
+ * POST /api/transactions
  */
+transactionRoutes.post(
+  "/",
+  authMiddleware,
+  validateRequest(createTransactionSchema),
+  asyncHandler(transactionController.createTransaction)
+);
 
-transactionRoutes.post('/system/initial-funds', authMiddleware.authSystemUserMiddleware,  asyncHandler(transactionController.createInitialFundsTransaction))
+/**
+ * POST /api/transactions/system/initial-funds
+ */
+transactionRoutes.post(
+  "/system/initial-funds",
+  authSystemUserMiddleware,
+  asyncHandler(transactionController.createInitialFundsTransaction)
+);
 
 module.exports = transactionRoutes;
