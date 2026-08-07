@@ -4,6 +4,7 @@ import { getAnalytics } from "../../services/analytics.service";
 import SummaryCards from "../../components/analytics/SummaryCards";
 import CashFlowChart from "../../components/analytics/CashFlowChart";
 import IncomeExpenseChart from "../../components/analytics/IncomeExpenseChart";
+import FinancialStats from "../../components/analytics/FinancialStats";
 
 function Analytics() {
   const [analytics, setAnalytics] = useState(null);
@@ -31,6 +32,12 @@ function Analytics() {
       <h1 className="text-4xl font-bold text-white">Analytics</h1>
 
       <SummaryCards monthlyData={analytics.monthlyData} />
+      <FinancialStats
+        transactionCount={analytics.transactionCount}
+        averageTransaction={analytics.averageTransaction}
+        largestIncome={analytics.largestIncome}
+        largestExpense={analytics.largestExpense}
+      />
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <CashFlowChart data={analytics.monthlyData} />
