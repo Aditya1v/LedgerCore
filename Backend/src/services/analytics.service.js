@@ -11,7 +11,7 @@ async function getAnalytics(user) {
 
   const accountIds = accounts.map((account) => account._id);
 
-  const [monthlyData, transactionStats, categoryData] = await Promise.all([
+  const [monthlyData, transactionStats, categorySpending,] = await Promise.all([
     // Monthly Data
     transactionModel.aggregate([
       {
@@ -128,19 +128,17 @@ async function getAnalytics(user) {
     ]),
 
     //Category-wise Spending
-    transactionModel.aggregate([
+     transactionModel.aggregate([
       {
         $match: {
-          fromAccount: {
-            $in: accountIds,
-          },
+          fromAccount: { $in: accountIds },
           status: "COMPLETED",
         },
       },
       {
         $group: {
           _id: "$category",
-          value: {
+          amount: {
             $sum: "$amount",
           },
         },
@@ -148,17 +146,16 @@ async function getAnalytics(user) {
       {
         $project: {
           _id: 0,
-          name: "$_id",
-          value: 1,
+          category: "$_id",
+          amount: 1,
         },
       },
       {
         $sort: {
-          value: -1,
+          amount: -1,
         },
       },
     ]),
-
   ]);
 
   const stats = transactionStats[0] || {
@@ -175,7 +172,7 @@ async function getAnalytics(user) {
     largestIncome: stats.largestIncome,
     largestExpense: stats.largestExpense,
 
-    categoryData,
+    categorySpending,
   };
 }
 
