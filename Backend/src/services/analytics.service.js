@@ -11,7 +11,8 @@ async function getAnalytics(user) {
 
   const accountIds = accounts.map((account) => account._id);
 
-  const [monthlyData, transactionStats] = await Promise.all([
+  const [monthlyData, transactionStats, categoryData] = await Promise.all([
+    // Monthly Data
     transactionModel.aggregate([
       {
         $match: {
@@ -51,21 +52,13 @@ async function getAnalytics(user) {
 
           income: {
             $sum: {
-              $cond: [
-                { $in: ["$toAccount", accountIds] },
-                "$amount",
-                0,
-              ],
+              $cond: [{ $in: ["$toAccount", accountIds] }, "$amount", 0],
             },
           },
 
           expense: {
             $sum: {
-              $cond: [
-                { $in: ["$fromAccount", accountIds] },
-                "$amount",
-                0,
-              ],
+              $cond: [{ $in: ["$fromAccount", accountIds] }, "$amount", 0],
             },
           },
         },
@@ -87,6 +80,7 @@ async function getAnalytics(user) {
       },
     ]),
 
+    // Transaction Stats
     transactionModel.aggregate([
       {
         $match: {
@@ -120,26 +114,51 @@ async function getAnalytics(user) {
 
           largestIncome: {
             $max: {
-              $cond: [
-                { $in: ["$toAccount", accountIds] },
-                "$amount",
-                0,
-              ],
+              $cond: [{ $in: ["$toAccount", accountIds] }, "$amount", 0],
             },
           },
 
           largestExpense: {
             $max: {
-              $cond: [
-                { $in: ["$fromAccount", accountIds] },
-                "$amount",
-                0,
-              ],
+              $cond: [{ $in: ["$fromAccount", accountIds] }, "$amount", 0],
             },
           },
         },
       },
     ]),
+
+    //Category-wise Spending
+    transactionModel.aggregate([
+      {
+        $match: {
+          fromAccount: {
+            $in: accountIds,
+          },
+          status: "COMPLETED",
+        },
+      },
+      {
+        $group: {
+          _id: "$category",
+          value: {
+            $sum: "$amount",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: "$_id",
+          value: 1,
+        },
+      },
+      {
+        $sort: {
+          value: -1,
+        },
+      },
+    ]),
+
   ]);
 
   const stats = transactionStats[0] || {
@@ -155,6 +174,8 @@ async function getAnalytics(user) {
     averageTransaction: Math.round(stats.averageTransaction),
     largestIncome: stats.largestIncome,
     largestExpense: stats.largestExpense,
+
+    categoryData,
   };
 }
 
