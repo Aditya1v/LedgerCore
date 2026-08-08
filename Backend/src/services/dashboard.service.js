@@ -1,5 +1,5 @@
 const accountModel = require("../models/account.model");
-const ledgerModel = require("../models/legder.model");
+const ledgerModel = require("../models/ledger.model");
 const transactionModel = require("../models/transaction.model");
 
 const getDashboardSummaryService = async (user) => {

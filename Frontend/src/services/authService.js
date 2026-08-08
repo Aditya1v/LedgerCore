@@ -29,3 +29,8 @@ export const changePassword = async (data) => {
   const response = await api.put("/auth/change-password", data);
   return response.data;
 };
+
+export const demoLogin = async () => {
+  const response = await api.post("/demo");
+  return response.data;
+};

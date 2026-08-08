@@ -1,5 +1,5 @@
 const userModel = require("../models/user.model");
-const jwt = require("jsonwebtoken");
+const generateToken = require("../utils/generateToken");
 const emailService = require("../services/email.service");
 const tokenblackListModel = require("../models/blackList.model");
 const AppError = require("../utils/AppError");
@@ -26,11 +26,7 @@ async function userRegisterController(req, res) {
     name,
   });
 
-  const token = jwt.sign(
-    { userID: user._id },
-    process.env.JWT_SECRET,
-    { expiresIn: "3d" }
-  );
+  const token = generateToken(user._id);
 
   res.cookie("token", token);
 
@@ -65,11 +61,7 @@ async function userLoginController(req, res) {
     throw new AppError("Invalid email or password", 401);
   }
 
-  const token = jwt.sign(
-    { userID: user._id },
-    process.env.JWT_SECRET,
-    { expiresIn: "3d" }
-  );
+  const token = generateToken(user._id);
 
   res.cookie("token", token);
 

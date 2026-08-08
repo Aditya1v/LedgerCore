@@ -3,16 +3,14 @@ import { useContext, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 
-
 import AuthLayout from "../../layouts/AuthLayout";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { loginSchema } from "../../validations/authSchema";
-import { loginUser } from "../../services/authService";
+import { loginUser, demoLogin } from "../../services/authService";
 import { AuthContext } from "../../context/AuthContext";
 
 function Login() {
-
   const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   // Initialize React Hook Form
@@ -29,16 +27,12 @@ function Login() {
 
   // Runs when the form is submitted successfully
   const onSubmit = async (data) => {
-
-
     setServerError("");
     setLoading(true);
     try {
       const response = await loginUser(data);
 
-
       setUser(response.data.user);
-
 
       navigate("/dashboard"); //we use navigate after user , it prevent before rendring of dashboard page.
 
@@ -50,7 +44,22 @@ function Login() {
       setLoading(false);
     }
   };
+  const handleDemoLogin = async () => {
+    setServerError("");
+    setLoading(true);
 
+    try {
+      const response = await demoLogin();
+
+      setUser(response.data.user);
+
+      navigate("/dashboard");
+    } catch (error) {
+      setServerError(error.response?.data?.message || "Demo login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <AuthLayout>
       <h1 className="text-5xl font-bold text-white">Welcome back</h1>
@@ -77,6 +86,14 @@ function Login() {
         {serverError && <p className="text-red-500 text-sm">{serverError}</p>}
         <Button type="submit" disabled={loading}>
           {loading ? "Signing In..." : "Sign In"}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={handleDemoLogin}
+          disabled={loading}
+        >
+          {loading ? "Loading..." : "Try Demo"}
         </Button>
       </form>
     </AuthLayout>

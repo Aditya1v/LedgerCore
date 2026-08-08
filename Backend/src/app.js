@@ -27,13 +27,14 @@ const transactionRouter = require('./routes/transaction.routes')
 const dashboardRoutes = require('./routes/dashboard.routes')
 const analyticsRoutes = require("./routes/analytics.routes");
 const settingsRoutes = require("./routes/settings.routes");
+const demoRoutes = require("./routes/demo.routes");
 
 
 //dummy route for testing
 app.get("/",(req,res)=>{
   res.send("Welcome to Banking Ledger System API")
 })
-
+app.use("/api/demo", demoRoutes);
 
 /**
  * - Use Routes

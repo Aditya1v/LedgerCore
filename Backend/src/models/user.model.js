@@ -25,6 +25,11 @@ const userSchema = new mongoose.Schema({
     default:false,
     immutable:true,
     select:false,
+  },
+  demo: {
+    type:Boolean,
+    default:false,
+    index:true,
   }
 },{
   timestamps: true
