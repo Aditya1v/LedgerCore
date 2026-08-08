@@ -1,16 +1,45 @@
-# React + Vite
+# LedgerCore — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite single-page app for LedgerCore, a banking dashboard for managing accounts, transferring funds, and tracking spending.
 
-Currently, two official plugins are available:
+> For the full project overview, architecture, and API reference, see the [root README](../Readme.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+- React 19 + Vite 8
+- Tailwind CSS v4
+- React Router 7
+- React Hook Form + Zod
+- Axios + TanStack React Query
+- Recharts, Framer Motion, lucide-react
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Runs at `http://localhost:5173` and expects the backend API at `http://localhost:3000/api` (see [`../backend/Readme.md`](../backend/Readme.md)). No `.env` file is needed on the frontend.
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the dev server with hot reload |
+| `npm run build` | Production build → `dist/` |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint |
+
+## Project Structure
+
+```
+src/
+├── pages/          # Route-level screens
+├── components/     # ui/, layout/, dashboard/, accounts/, transactions/, analytics/, settings/, forms/
+├── layouts/         # DashboardLayout, AuthLayout
+├── context/          # Auth context/provider
+├── services/          # Axios API clients
+├── validations/        # Zod schemas
+└── utils/               # Formatting & PDF receipt helpers
+```
