@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react"; 
 import { toast } from "sonner";
 import { BellRing, Coins, Info, Palette } from "lucide-react";
 
@@ -12,7 +12,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
 import { Skeleton } from "../../components/ui/Loader";
 
-import { getSettings, updateSettings } from "../../services/settingsService";
+import { useSettings } from "../../context/SettingsContext";
 
 const SECTIONS = [
   { id: "appearance", label: "Appearance", icon: Palette },
@@ -22,42 +22,14 @@ const SECTIONS = [
 ];
 
 function Settings() {
-  const [settings, setSettings] = useState({
-    theme: "SYSTEM",
-    currency: "INR",
-    emailNotifications: true,
-    transactionAlerts: true,
-    marketingEmails: false,
-  });
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
-      const response = await getSettings();
-      setSettings(response.data);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to load settings.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
+  const { settings, setSettings, loading, saving, saveSettings } = useSettings();
 
   const handleSave = async () => {
     try {
-      setSaving(true);
-      await updateSettings(settings);
+      await saveSettings(settings);
       toast.success("Settings updated successfully.");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save settings.");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -87,7 +59,6 @@ function Settings() {
       />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[180px_1fr]">
-        {/* Section nav — desktop only */}
         <nav className="hidden lg:block">
           <ul className="sticky top-24 space-y-1">
             {SECTIONS.map(({ id, label, icon: Icon }) => (
@@ -105,7 +76,7 @@ function Settings() {
         </nav>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <AppearanceCard />
+          <AppearanceCard settings={settings} setSettings={setSettings} />
           <PreferenceCard settings={settings} setSettings={setSettings} />
           <NotificationCard settings={settings} setSettings={setSettings} />
           <AboutCard />

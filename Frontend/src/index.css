@@ -1,10 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
 @import "tailwindcss";
 
-/* ==========================================================================
-   LedgerCore Design System
-   A refined dark fintech token system — Stripe x Linear x Mercury inspired.
-   ========================================================================== */
+
 
 @theme {
   /* ---- Typography ---- */
@@ -63,9 +60,7 @@
   --shadow-glow-accent: 0 0 0 1px rgba(84, 104, 255, 0.25), 0 8px 30px -10px rgba(84, 104, 255, 0.35);
 }
 
-/* ==========================================================================
-   Base layer
-   ========================================================================== */
+/* Base layer */
 
 @layer base {
   * {
@@ -129,9 +124,7 @@
   }
 }
 
-/* ==========================================================================
-   Reusable utilities
-   ========================================================================== */
+/* Reusable utilities */
 
 @utility financial-figure {
   font-family: var(--font-display);
@@ -160,4 +153,43 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Theme overrides */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-canvas: #f5f7fb;
+  --color-elevated: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1f4f9;
+  --color-surface-2: #eef2f7;
+  --color-surface-3: #e6ebf2;
+  --color-line: rgba(15, 23, 42, 0.08);
+  --color-line-strong: rgba(15, 23, 42, 0.14);
+  --color-line-soft: rgba(15, 23, 42, 0.05);
+  --color-ink: #101828;
+  --color-ink-muted: #475467;
+  --color-ink-faint: #667085;
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 28px -14px rgba(15, 23, 42, 0.18);
+  --shadow-modal: 0 24px 56px -18px rgba(15, 23, 42, 0.24);
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    color-scheme: light;
+    --color-canvas: #f5f7fb;
+    --color-elevated: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-hover: #f1f4f9;
+    --color-surface-2: #eef2f7;
+    --color-surface-3: #e6ebf2;
+    --color-line: rgba(15, 23, 42, 0.08);
+    --color-line-strong: rgba(15, 23, 42, 0.14);
+    --color-line-soft: rgba(15, 23, 42, 0.05);
+    --color-ink: #101828;
+    --color-ink-muted: #475467;
+    --color-ink-faint: #667085;
+    --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 28px -14px rgba(15, 23, 42, 0.18);
+    --shadow-modal: 0 24px 56px -18px rgba(15, 23, 42, 0.24);
+  }
 }
