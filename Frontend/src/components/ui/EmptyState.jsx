@@ -1,26 +1,24 @@
-function EmptyState({
-  title,
-  description,
-  action,
-}) {
+import { motion } from "framer-motion";
+import { Inbox } from "lucide-react";
+
+function EmptyState({ title, description, action, icon: Icon = Inbox }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-900 p-12 text-center">
-      <div className="text-6xl">📭</div>
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="flex flex-col items-center justify-center rounded-card border border-dashed border-line-strong bg-surface/60 px-8 py-16 text-center"
+    >
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-ink-faint">
+        <Icon size={24} strokeWidth={1.75} />
+      </div>
 
-      <h2 className="mt-6 text-2xl font-bold text-white">
-        {title}
-      </h2>
+      <h2 className="mt-5 text-lg font-semibold text-ink">{title}</h2>
 
-      <p className="mt-3 max-w-md text-slate-400">
-        {description}
-      </p>
+      <p className="mt-2 max-w-sm text-sm text-ink-faint">{description}</p>
 
-      {action && (
-        <div className="mt-8">
-          {action}
-        </div>
-      )}
-    </div>
+      {action && <div className="mt-6">{action}</div>}
+    </motion.div>
   );
 }
 

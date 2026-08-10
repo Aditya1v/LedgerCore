@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import Loader from "../../components/ui/Loader";
+import PageContainer from "../../components/ui/PageContainer";
+import PageHeader from "../../components/ui/PageHeader";
 import { getAnalytics } from "../../services/analytics.service";
 
 import SummaryCards from "../../components/analytics/SummaryCards";
@@ -28,32 +30,18 @@ function Analytics() {
     fetchAnalytics();
   }, []);
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader label="Loading analytics" />;
+  if (!analytics) return null;
 
-  const totalIncome = analytics.monthlyData.reduce(
-    (sum, item) => sum + item.income,
-    0
-  );
-
-  const totalExpense = analytics.monthlyData.reduce(
-    (sum, item) => sum + item.expense,
-    0
-  );
+  const totalIncome = analytics.monthlyData.reduce((sum, item) => sum + item.income, 0);
+  const totalExpense = analytics.monthlyData.reduce((sum, item) => sum + item.expense, 0);
 
   return (
-    <div>
-      {/* Page Heading */}
-      <div className="mb-8">
-        <h1 className="text-5xl font-bold text-white">Analytics</h1>
-        <p className="mt-2 text-slate-400">
-          Financial insights and spending overview
-        </p>
-      </div>
+    <PageContainer wide>
+      <PageHeader title="Analytics" subtitle="Understand your financial activity and cash flow." />
 
-      {/* Top Summary Cards */}
       <SummaryCards monthlyData={analytics.monthlyData} />
 
-      {/* Statistics Cards */}
       <FinancialStats
         transactionCount={analytics.transactionCount}
         averageTransaction={analytics.averageTransaction}
@@ -61,29 +49,20 @@ function Analytics() {
         largestExpense={analytics.largestExpense}
       />
 
-      {/* Charts */}
-      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-4">
-        {/* Cash Flow */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
         <div className="xl:col-span-2">
           <CashFlowChart data={analytics.monthlyData} />
         </div>
 
-        {/* Pie Chart */}
         <div className="xl:col-span-2">
-          <IncomeExpenseChart
-            income={totalIncome}
-            expense={totalExpense}
-          />
+          <IncomeExpenseChart income={totalIncome} expense={totalExpense} />
         </div>
 
-        {/* Full Width Category Spending */}
         <div className="xl:col-span-4">
-          <CategorySpendingChart
-            data={analytics.categorySpending}
-          />
+          <CategorySpendingChart data={analytics.categorySpending} />
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

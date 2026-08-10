@@ -1,24 +1,29 @@
+import { Info } from "lucide-react";
+import Card from "../ui/Card";
+
+const DETAILS = [
+  { label: "Version", value: "1.0.0" },
+  { label: "Stack", value: "MERN" },
+  { label: "Developer", value: "Aditya Verma" },
+];
+
 function AboutCard() {
   return (
-    <div className="rounded-2xl border border-slate-700 bg-slate-800 p-6">
-      <h2 className="text-xl font-semibold text-white">
-        About LedgerCore
-      </h2>
-
-      <div className="mt-6 space-y-3 text-slate-300">
-        <p>
-          <strong>Version:</strong> 1.0.0
-        </p>
-
-        <p>
-          <strong>Stack:</strong> MERN
-        </p>
-
-        <p>
-          <strong>Developer:</strong> Aditya Verma
-        </p>
+    <Card id="about">
+      <div className="flex items-center gap-2.5">
+        <Info size={18} className="text-accent-hover" />
+        <h2 className="text-[16px] font-semibold text-ink">About LedgerCore</h2>
       </div>
-    </div>
+
+      <div className="mt-5 divide-y divide-line">
+        {DETAILS.map((item) => (
+          <div key={item.label} className="flex items-center justify-between py-2.5 text-sm">
+            <span className="text-ink-faint">{item.label}</span>
+            <span className="font-medium text-ink">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 

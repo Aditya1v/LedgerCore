@@ -1,33 +1,25 @@
 import { useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { AuthContext } from "../../context/AuthContext";
 import { updateProfile } from "../../services/authService";
+import Modal from "../ui/Modal";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 
 function EditProfileModal({ isOpen, onClose }) {
   const { user, setUser } = useContext(AuthContext);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-  });
-
+  const [formData, setFormData] = useState({ name: "", email: "" });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setFormData({
-        name: user.name,
-        email: user.email,
-      });
+      setFormData({ name: user.name, email: user.email });
     }
   }, [user, isOpen]);
 
-  if (!isOpen) return null;
-
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -35,85 +27,34 @@ function EditProfileModal({ isOpen, onClose }) {
 
     try {
       setLoading(true);
-
       const response = await updateProfile(formData);
-
       setUser(response.data);
-
+      toast.success("Profile updated successfully.");
       onClose();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to update profile");
+      toast.error(err.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <Modal isOpen={isOpen} onClose={onClose} title="Edit Profile" size="sm">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <Input label="Name" name="name" value={formData.name} onChange={handleChange} />
+        <Input label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
 
-      <div className="w-full max-w-md rounded-2xl bg-slate-900 p-8">
-
-        <h2 className="text-2xl font-bold text-white">
-          Edit Profile
-        </h2>
-
-        <form
-          onSubmit={handleSubmit}
-          className="mt-6 space-y-5"
-        >
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Name
-            </label>
-
-            <input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              Email
-            </label>
-
-            <input
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-3">
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl border border-slate-700 px-5 py-2 text-white"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-            >
-              {loading ? "Saving..." : "Save Changes"}
-            </button>
-
-          </div>
-
-        </form>
-
-      </div>
-
-    </div>
+        <div className="flex justify-end gap-3 pt-1">
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={loading}>
+            Save Changes
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 

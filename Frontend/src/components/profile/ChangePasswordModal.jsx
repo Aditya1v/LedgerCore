@@ -1,7 +1,8 @@
 import { useState } from "react";
-
 import { toast } from "sonner";
 import { changePassword } from "../../services/authService";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
 import PasswordInput from "../ui/PasswordInput";
 
 function ChangePasswordModal({ isOpen, onClose }) {
@@ -17,22 +18,12 @@ function ChangePasswordModal({ isOpen, onClose }) {
 
   const [loading, setLoading] = useState(false);
 
-  if (!isOpen) return null;
-
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const resetForm = () => {
-    setFormData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-
+    setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
     setShowCurrent(false);
     setShowNew(false);
     setShowConfirm(false);
@@ -68,64 +59,61 @@ function ChangePasswordModal({ isOpen, onClose }) {
     }
   };
 
-
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-full max-w-md rounded-2xl bg-slate-900 p-8">
-        <h2 className="text-2xl font-bold text-white">Change Password</h2>
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        resetForm();
+        onClose();
+      }}
+      title="Change Password"
+      size="sm"
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <PasswordInput
+          label="Current Password"
+          name="currentPassword"
+          value={formData.currentPassword}
+          show={showCurrent}
+          setShow={setShowCurrent}
+          onChange={handleChange}
+        />
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          <PasswordInput
-  label="Current Password"
-  name="currentPassword"
-  value={formData.currentPassword}
-  show={showCurrent}
-  setShow={setShowCurrent}
-  onChange={handleChange}
-/>
+        <PasswordInput
+          label="New Password"
+          name="newPassword"
+          value={formData.newPassword}
+          show={showNew}
+          setShow={setShowNew}
+          onChange={handleChange}
+        />
 
-          <PasswordInput
-            label="New Password"
-            name="newPassword"
-            value={formData.newPassword}
-            show={showNew}
-            setShow={setShowNew}
-            onChange={handleChange}
-          />
+        <PasswordInput
+          label="Confirm Password"
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          show={showConfirm}
+          setShow={setShowConfirm}
+          onChange={handleChange}
+        />
 
-          <PasswordInput
-            label="Confirm Password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            show={showConfirm}
-            setShow={setShowConfirm}
-            onChange={handleChange}
-          />
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                resetForm();
-                onClose();
-              }}
-              className="rounded-xl border border-slate-700 px-5 py-2 text-white"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-            >
-              {loading ? "Updating..." : "Change Password"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="flex justify-end gap-3 pt-1">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              resetForm();
+              onClose();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" loading={loading}>
+            Change Password
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 

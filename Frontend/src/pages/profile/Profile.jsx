@@ -1,8 +1,14 @@
-import { User, Mail, Shield } from "lucide-react";
 import { useContext, useState } from "react";
+import { Mail, Shield, User } from "lucide-react";
+
 import { AuthContext } from "../../context/AuthContext";
 import EditProfileModal from "../../components/profile/EditProfileModal";
 import ChangePasswordModal from "../../components/profile/ChangePasswordModal";
+import PageContainer from "../../components/ui/PageContainer";
+import PageHeader from "../../components/ui/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Avatar from "../../components/ui/Avatar";
 
 function Profile() {
   const { user } = useContext(AuthContext);
@@ -11,90 +17,48 @@ function Profile() {
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
 
   return (
-    <>
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-5xl font-bold text-white">
-          Profile
-        </h1>
+    <PageContainer className="max-w-4xl">
+      <PageHeader title="Profile" subtitle="Manage your account information and security." />
 
-        <p className="mt-2 text-slate-400">
-          Manage your account information and security.
-        </p>
+      <Card>
+        <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
+          <Avatar name={user?.name} size="xl" />
 
-        <div className="mt-10 rounded-2xl border border-slate-700 bg-slate-800 p-8">
-          <div className="flex items-center gap-6">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-600 text-4xl font-bold text-white">
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-
-            <div>
-              <h2 className="text-3xl font-bold text-white">
-                {user?.name}
-              </h2>
-
-              <p className="mt-1 text-slate-400">
-                {user?.email}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <div className="rounded-xl border border-slate-700 bg-slate-900 p-6">
-              <div className="flex items-center gap-3">
-                <User className="text-blue-400" />
-                <h3 className="text-lg font-semibold text-white">
-                  Name
-                </h3>
-              </div>
-
-              <p className="mt-4 text-slate-300">
-                {user?.name}
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-700 bg-slate-900 p-6">
-              <div className="flex items-center gap-3">
-                <Mail className="text-green-400" />
-                <h3 className="text-lg font-semibold text-white">
-                  Email
-                </h3>
-              </div>
-
-              <p className="mt-4 text-slate-300">
-                {user?.email}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 flex gap-4">
-            <button
-              onClick={() => setOpenEditModal(true)}
-              className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 transition"
-            >
-              Edit Profile
-            </button>
-
-            <button
-              onClick={() => setOpenPasswordModal(true)}
-              className="flex items-center gap-2 rounded-xl border border-slate-700 px-6 py-3 text-white hover:bg-slate-700 transition"
-            >
-              <Shield size={18} />
-              Change Password
-            </button>
+          <div className="min-w-0">
+            <h2 className="font-display text-2xl font-bold text-ink">{user?.name}</h2>
+            <p className="mt-1 text-[15px] text-ink-faint">{user?.email}</p>
           </div>
         </div>
-      </div>
 
-      <EditProfileModal
-        isOpen={openEditModal}
-        onClose={() => setOpenEditModal(false)}
-      />
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-card border border-line bg-surface-2 p-5">
+            <div className="flex items-center gap-2.5">
+              <User size={17} className="text-accent-hover" />
+              <h3 className="text-sm font-semibold text-ink">Name</h3>
+            </div>
+            <p className="mt-3 text-[15px] text-ink-muted">{user?.name}</p>
+          </div>
 
-      <ChangePasswordModal
-        isOpen={openPasswordModal}
-        onClose={() => setOpenPasswordModal(false)}
-      />
-    </>
+          <div className="rounded-card border border-line bg-surface-2 p-5">
+            <div className="flex items-center gap-2.5">
+              <Mail size={17} className="text-positive" />
+              <h3 className="text-sm font-semibold text-ink">Email</h3>
+            </div>
+            <p className="mt-3 truncate text-[15px] text-ink-muted">{user?.email}</p>
+          </div>
+        </div>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Button onClick={() => setOpenEditModal(true)}>Edit Profile</Button>
+          <Button variant="secondary" icon={Shield} onClick={() => setOpenPasswordModal(true)}>
+            Change Password
+          </Button>
+        </div>
+      </Card>
+
+      <EditProfileModal isOpen={openEditModal} onClose={() => setOpenEditModal(false)} />
+      <ChangePasswordModal isOpen={openPasswordModal} onClose={() => setOpenPasswordModal(false)} />
+    </PageContainer>
   );
 }
 

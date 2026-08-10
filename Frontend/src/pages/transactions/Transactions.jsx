@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
-import { getTransactions, getTransactionDetails, } from "../../services/transactionService";
+import { ChevronLeft, ChevronRight, Receipt, Search, SendHorizontal } from "lucide-react";
+import { getTransactions, getTransactionDetails } from "../../services/transactionService";
 
+import PageContainer from "../../components/ui/PageContainer";
+import PageHeader from "../../components/ui/PageHeader";
+import Button from "../../components/ui/Button";
 import Loader from "../../components/ui/Loader";
 import EmptyState from "../../components/ui/EmptyState";
 import TransactionCard from "../../components/transactions/TransactionCard";
@@ -29,9 +33,7 @@ function Transactions() {
   const handleTransactionClick = async (transactionId) => {
     try {
       setLoadingDetails(true);
-
       const transaction = await getTransactionDetails(transactionId);
-
       setSelectedTransaction(transaction);
       setIsDetailsOpen(true);
     } catch (error) {
@@ -45,14 +47,7 @@ function Transactions() {
     try {
       setLoading(true);
 
-      const response = await getTransactions({
-        page,
-        limit,
-        search,
-        category,
-        direction,
-        sort,
-      });
+      const response = await getTransactions({ page, limit, search, category, direction, sort });
 
       setTransactions(response.data.transactions);
       setPagination(response.data.pagination);
@@ -65,44 +60,38 @@ function Transactions() {
 
   useEffect(() => {
     fetchTransactions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, category, direction, sort]);
 
-  if (loading) return <Loader />;
+  const hasActiveFilters = search || category || direction;
 
   return (
-    <div>
-      {/* Header */}
-
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-5xl font-bold text-white">Transactions</h1>
-
-          <p className="mt-2 text-slate-400">
-            Total Transactions: {pagination.totalTransactions || 0}
-          </p>
-        </div>
-
-        <button
-          onClick={() => setOpenModal(true)}
-          className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
-        >
-          + Transfer Money
-        </button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Transactions"
+        subtitle="View and manage your complete transaction history."
+        action={
+          <Button icon={SendHorizontal} onClick={() => setOpenModal(true)}>
+            Transfer Money
+          </Button>
+        }
+      />
 
       {/* Filters */}
-
-      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white"
-        />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="relative sm:col-span-2 lg:col-span-1">
+          <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint" />
+          <input
+            type="text"
+            placeholder="Search transactions..."
+            value={search}
+            onChange={(e) => {
+              setPage(1);
+              setSearch(e.target.value);
+            }}
+            className="h-11 w-full rounded-control border border-line-strong bg-surface-2 pl-10 pr-3.5 text-[14.5px] text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-accent focus:ring-4 focus:ring-accent-soft"
+          />
+        </div>
 
         <select
           value={category}
@@ -110,7 +99,7 @@ function Transactions() {
             setPage(1);
             setCategory(e.target.value);
           }}
-          className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white"
+          className="h-11 w-full appearance-none rounded-control border border-line-strong bg-surface-2 px-3.5 text-[14.5px] text-ink outline-none transition-colors focus:border-accent focus:ring-4 focus:ring-accent-soft"
         >
           <option value="">All Categories</option>
           <option value="Transfer">Transfer</option>
@@ -123,19 +112,17 @@ function Transactions() {
             setPage(1);
             setDirection(e.target.value);
           }}
-          className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white"
+          className="h-11 w-full appearance-none rounded-control border border-line-strong bg-surface-2 px-3.5 text-[14.5px] text-ink outline-none transition-colors focus:border-accent focus:ring-4 focus:ring-accent-soft"
         >
-          <option value="">All</option>
+          <option value="">All Directions</option>
           <option value="IN">Incoming</option>
           <option value="OUT">Outgoing</option>
         </select>
 
         <select
           value={sort}
-          onChange={(e) => {
-            setSort(e.target.value);
-          }}
-          className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white"
+          onChange={(e) => setSort(e.target.value)}
+          className="h-11 w-full appearance-none rounded-control border border-line-strong bg-surface-2 px-3.5 text-[14.5px] text-ink outline-none transition-colors focus:border-accent focus:ring-4 focus:ring-accent-soft"
         >
           <option value="latest">Latest</option>
           <option value="oldest">Oldest</option>
@@ -144,67 +131,67 @@ function Transactions() {
         </select>
       </div>
 
-      {/* Empty */}
+      <p className="-mt-2 text-sm text-ink-faint">
+        {pagination.totalTransactions ?? 0} transaction{pagination.totalTransactions === 1 ? "" : "s"} found
+      </p>
 
-      {transactions.length === 0 ? (
-        <div className="mt-10">
-          <EmptyState
-            title="No Transactions"
-            description="No transactions found."
-          />
-        </div>
+      {/* List */}
+      {loading ? (
+        <Loader label="Loading transactions" />
+      ) : transactions.length === 0 ? (
+        <EmptyState
+          icon={Receipt}
+          title={hasActiveFilters ? "No matching transactions" : "No transactions yet"}
+          description={
+            hasActiveFilters
+              ? "Try adjusting your filters or search terms."
+              : "Transfer money between accounts to start building your history."
+          }
+        />
       ) : (
-        <div className="mt-8 grid gap-6">
+        <div className="grid gap-4">
           {transactions.map((transaction) => (
-            <TransactionCard
-              key={transaction._id}
-              transaction={transaction}
-              onClick={handleTransactionClick}
-            />
+            <TransactionCard key={transaction._id} transaction={transaction} onClick={handleTransactionClick} />
           ))}
         </div>
       )}
 
       {/* Pagination */}
+      {!loading && transactions.length > 0 && (
+        <div className="flex items-center justify-center gap-3">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((prev) => prev - 1)}
+            className="flex h-9 w-9 items-center justify-center rounded-control border border-line-strong text-ink-muted transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Previous page"
+          >
+            <ChevronLeft size={16} />
+          </button>
 
-      <div className="mt-8 flex items-center justify-center gap-4">
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((prev) => prev - 1)}
-          className="rounded-lg bg-slate-700 px-4 py-2 text-white disabled:opacity-40"
-        >
-          Previous
-        </button>
+          <span className="text-sm text-ink-faint">
+            Page {pagination.page || 1} of {pagination.totalPages || 1}
+          </span>
 
-        <span className="text-slate-300">
-          Page {pagination.page || 1} of {pagination.totalPages || 1}
-        </span>
+          <button
+            disabled={page === pagination.totalPages}
+            onClick={() => setPage((prev) => prev + 1)}
+            className="flex h-9 w-9 items-center justify-center rounded-control border border-line-strong text-ink-muted transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Next page"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
 
-        <button
-          disabled={page === pagination.totalPages}
-          onClick={() => setPage((prev) => prev + 1)}
-          className="rounded-lg bg-slate-700 px-4 py-2 text-white disabled:opacity-40"
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Modal */}
-
-      <TransferMoneyModal
-        isOpen={openModal}
-        onClose={() => setOpenModal(false)}
-        onTransactionCreated={fetchTransactions}
-      />
+      <TransferMoneyModal isOpen={openModal} onClose={() => setOpenModal(false)} onTransactionCreated={fetchTransactions} />
 
       <TransactionDetailsModal
         isOpen={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
         transaction={selectedTransaction}
         loading={loadingDetails}
-
       />
-    </div>
+    </PageContainer>
   );
 }
 

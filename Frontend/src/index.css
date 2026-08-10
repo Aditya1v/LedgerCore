@@ -1,1 +1,163 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
 @import "tailwindcss";
+
+/* ==========================================================================
+   LedgerCore Design System
+   A refined dark fintech token system — Stripe x Linear x Mercury inspired.
+   ========================================================================== */
+
+@theme {
+  /* ---- Typography ---- */
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* ---- Surfaces ---- */
+  --color-canvas: #090c12;         /* app background */
+  --color-elevated: #0d121a;       /* navbar / sidebar */
+  --color-surface: #121722;        /* card surface */
+  --color-surface-hover: #161d2b;  /* hovered card / row */
+  --color-surface-2: #171e2a;      /* inputs, nested surfaces */
+  --color-surface-3: #1d2536;      /* nested-nested / active controls */
+
+  /* ---- Lines ---- */
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
+  --color-line-soft: rgba(255, 255, 255, 0.05);
+
+  /* ---- Ink (text) ---- */
+  --color-ink: #f3f5f9;
+  --color-ink-muted: #96a1b2;
+  --color-ink-faint: #5c6577;
+
+  /* ---- Accent (electric indigo) ---- */
+  --color-accent: #5468ff;
+  --color-accent-hover: #6c7dff;
+  --color-accent-active: #4457e6;
+  --color-accent-soft: rgba(84, 104, 255, 0.12);
+  --color-accent-line: rgba(84, 104, 255, 0.35);
+
+  /* ---- Semantic financial colors ---- */
+  --color-positive: #2fd180;
+  --color-positive-soft: rgba(47, 209, 128, 0.12);
+  --color-positive-line: rgba(47, 209, 128, 0.3);
+
+  --color-negative: #f1594f;
+  --color-negative-soft: rgba(241, 89, 79, 0.12);
+  --color-negative-line: rgba(241, 89, 79, 0.3);
+
+  --color-warning: #f3b94d;
+  --color-warning-soft: rgba(243, 185, 77, 0.12);
+  --color-warning-line: rgba(243, 185, 77, 0.3);
+
+  /* ---- Radius ---- */
+  --radius-control: 0.7rem;   /* 11px — inputs, buttons */
+  --radius-card: 1rem;        /* 16px — cards */
+  --radius-card-lg: 1.125rem; /* 18px — feature cards */
+  --radius-modal: 1.375rem;   /* 22px — modals */
+  --radius-pill: 999px;
+
+  /* ---- Shadow ---- */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 1px 1px 0 rgba(0, 0, 0, 0.2), 0 12px 28px -14px rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 32px 64px -20px rgba(0, 0, 0, 0.65);
+  --shadow-glow-accent: 0 0 0 1px rgba(84, 104, 255, 0.25), 0 8px 30px -10px rgba(84, 104, 255, 0.35);
+}
+
+/* ==========================================================================
+   Base layer
+   ========================================================================== */
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--color-accent-soft);
+    color: var(--color-ink);
+  }
+
+  /* Visible, accent-colored focus ring for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Slim, unobtrusive scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--color-line-strong);
+    border-radius: 999px;
+  }
+
+  /* Remove native number input spinners for a cleaner amount field */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* ==========================================================================
+   Reusable utilities
+   ========================================================================== */
+
+@utility financial-figure {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+@utility bg-grid-fade {
+  background-image:
+    linear-gradient(to bottom, rgba(84, 104, 255, 0.08), transparent 60%),
+    radial-gradient(120% 100% at 100% 0%, rgba(84, 104, 255, 0.14), transparent 55%);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@utility animate-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-surface) 30%,
+    var(--color-surface-hover) 45%,
+    var(--color-surface-hover) 55%,
+    var(--color-surface) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}

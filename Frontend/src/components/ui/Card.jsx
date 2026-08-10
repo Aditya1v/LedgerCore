@@ -1,26 +1,33 @@
 import { motion } from "framer-motion";
+import { cn } from "../../utils/cn";
 
-function Card({ children, className = "", ...props }) {
+/**
+ * Base surface used throughout the app. `interactive` adds a hover lift for
+ * cards that act like affordances (clickable rows, nav items).
+ */
+function Card({
+  children,
+  className = "",
+  interactive = false,
+  padding = "p-6",
+  as: Component = motion.div,
+  ...props
+}) {
   return (
-    <motion.div
-      whileHover={{ y: -3 }}
-      transition={{ duration: 0.2 }}
-      className={`
-        rounded-2xl
-        border
-        border-slate-700
-        bg-slate-800
-        p-6
-        shadow-sm
-        transition-all
-        duration-200
-        hover:shadow-lg
-        ${className}
-      `}
+    <Component
+      {...(interactive
+        ? { whileHover: { y: -2 }, transition: { duration: 0.18, ease: "easeOut" } }
+        : {})}
+      className={cn(
+        "rounded-card border border-line bg-surface shadow-card",
+        padding,
+        interactive && "cursor-pointer transition-colors hover:border-line-strong hover:bg-surface-hover",
+        className
+      )}
       {...props}
     >
       {children}
-    </motion.div>
+    </Component>
   );
 }
 

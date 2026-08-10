@@ -8,7 +8,7 @@ import { Toaster } from "sonner";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
-      <Toaster richColors position="top-right" closeButton duration={3000} />
+      <Toaster theme="dark" richColors position="top-right" closeButton duration={3000} />
       <App />
     </AuthProvider>
   </React.StrictMode>,

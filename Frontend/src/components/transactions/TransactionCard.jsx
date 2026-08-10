@@ -1,85 +1,71 @@
-import { ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import Badge from "../ui/Badge";
+import { formatCurrency } from "../../utils/formatCurrency";
+import { cn } from "../../utils/cn";
 
-function TransactionCard({ transaction,  onClick }) {
+const STATUS_VARIANT = {
+  COMPLETED: "positive",
+  PENDING: "warning",
+  FAILED: "negative",
+};
+
+function TransactionCard({ transaction, onClick }) {
   const isCredit = transaction.direction === "IN";
 
   return (
-    <div onClick={() => onClick(transaction._id)} className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-lg hover:border-blue-500 transition-all cursor-pointer">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
+    <motion.button
+      type="button"
+      onClick={() => onClick(transaction._id)}
+      whileHover={{ y: -1 }}
+      transition={{ duration: 0.15 }}
+      className="w-full rounded-card border border-line bg-surface p-5 text-left shadow-card transition-colors hover:border-line-strong hover:bg-surface-hover sm:p-6"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3.5">
           <div
-            className={`p-3 rounded-full ${
-              isCredit
-                ? "bg-green-500/20 text-green-400"
-                : "bg-red-500/20 text-red-400"
-            }`}
+            className={cn(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-control",
+              isCredit ? "bg-positive-soft" : "bg-negative-soft"
+            )}
           >
             {isCredit ? (
-              <ArrowDownLeft size={20} />
+              <ArrowDownLeft size={19} className="text-positive" />
             ) : (
-              <ArrowUpRight size={20} />
+              <ArrowUpRight size={19} className="text-negative" />
             )}
           </div>
 
-          <div>
-            <h3 className="text-lg font-semibold text-white">
-              {transaction.category}
-            </h3>
-
-            <p className="text-slate-400 text-sm">
-              {transaction.transactionType}
-            </p>
+          <div className="min-w-0">
+            <h3 className="truncate text-[15px] font-semibold text-ink">{transaction.category}</h3>
+            <p className="mt-0.5 truncate text-[13px] text-ink-faint">{transaction.transactionType}</p>
           </div>
         </div>
 
-        <div className="text-right">
-          <h2
-            className={`text-2xl font-bold ${
-              isCredit ? "text-green-400" : "text-red-400"
-            }`}
-          >
-            {isCredit ? "+" : "-"}₹
-            {transaction.amount.toLocaleString()}
-          </h2>
-
-          <span
-            className={`text-xs px-2 py-1 rounded-full ${
-              transaction.status === "COMPLETED"
-                ? "bg-green-500/20 text-green-400"
-                : "bg-yellow-500/20 text-yellow-400"
-            }`}
-          >
+        <div className="shrink-0 text-right">
+          <p className={cn("financial-figure text-lg font-bold", isCredit ? "text-positive" : "text-negative")}>
+            {isCredit ? "+" : "-"}
+            {formatCurrency(transaction.amount)}
+          </p>
+          <Badge variant={STATUS_VARIANT[transaction.status] || "neutral"} className="mt-1.5">
             {transaction.status}
-          </span>
+          </Badge>
         </div>
       </div>
 
-      <div className="mt-6 border-t border-slate-700 pt-4 text-sm text-slate-400 space-y-2">
-        <div className="flex justify-between">
-          <span>From</span>
-
-          <span className="text-white">
-            {transaction.fromAccount?.name || "Deleted Account"}
-          </span>
-        </div>
-
-        <div className="flex justify-between">
-          <span>To</span>
-
-          <span className="text-white">
-            {transaction.toAccount?.name || "Deleted Account"}
-          </span>
-        </div>
-
-        <div className="flex justify-between">
-          <span>Date</span>
-
-          <span>
-            {new Date(transaction.createdAt).toLocaleDateString()}
-          </span>
-        </div>
+      <div className="mt-4 flex flex-col gap-1.5 border-t border-line pt-4 text-[13px] text-ink-faint sm:flex-row sm:items-center sm:justify-between">
+        <span className="truncate">
+          <span className="text-ink-muted">{transaction.fromAccount?.name || "Deleted account"}</span>
+          {" → "}
+          <span className="text-ink-muted">{transaction.toAccount?.name || "Deleted account"}</span>
+        </span>
+        <span className="shrink-0">{new Date(transaction.createdAt).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })}</span>
       </div>
-    </div>
+    </motion.button>
   );
 }
 

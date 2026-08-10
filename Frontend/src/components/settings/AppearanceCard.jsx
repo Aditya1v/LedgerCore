@@ -1,20 +1,22 @@
+import { Palette } from "lucide-react";
+import Card from "../ui/Card";
+
 function AppearanceCard() {
   return (
-    <div className="rounded-2xl border border-slate-700 bg-slate-800 p-6">
-      <h2 className="text-xl font-semibold text-white">
-        Appearance
-      </h2>
+    <Card id="appearance">
+      <div className="flex items-center gap-2.5">
+        <Palette size={18} className="text-accent-hover" />
+        <h2 className="text-[16px] font-semibold text-ink">Appearance</h2>
+      </div>
 
-      <p className="mt-2 text-slate-400">
+      <p className="mt-2 text-sm text-ink-faint">
         Theme customization will be available in a future update.
       </p>
 
-      <div className="mt-6 rounded-xl border border-dashed border-slate-600 bg-slate-900 p-4">
-        <p className="text-sm text-slate-400">
-          🚧 Coming Soon
-        </p>
+      <div className="mt-5 rounded-control border border-dashed border-line-strong bg-surface-2 px-4 py-3">
+        <p className="text-xs font-medium text-ink-faint">Coming soon</p>
       </div>
-    </div>
+    </Card>
   );
 }
 

@@ -1,49 +1,45 @@
+import { BellRing } from "lucide-react";
+import Card from "../ui/Card";
+import Switch from "../ui/Switch";
+
 function NotificationCard({ settings, setSettings }) {
   const toggle = (key) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
-    <div className="rounded-2xl border border-slate-700 bg-slate-800 p-6">
-      <h2 className="text-xl font-semibold text-white">
-        Notifications
-      </h2>
+    <Card id="notifications">
+      <div className="flex items-center gap-2.5">
+        <BellRing size={18} className="text-accent-hover" />
+        <h2 className="text-[16px] font-semibold text-ink">Notifications</h2>
+      </div>
 
       <div className="mt-6 space-y-5">
-        <label className="flex items-center justify-between text-white">
-          Email Notifications
+        <Switch
+          id="emailNotifications"
+          label="Email Notifications"
+          description="Receive account updates by email."
+          checked={settings.emailNotifications}
+          onChange={() => toggle("emailNotifications")}
+        />
 
-          <input
-            type="checkbox"
-            checked={settings.emailNotifications}
-            onChange={() => toggle("emailNotifications")}
-          />
-        </label>
+        <Switch
+          id="transactionAlerts"
+          label="Transaction Alerts"
+          description="Get notified for every transfer."
+          checked={settings.transactionAlerts}
+          onChange={() => toggle("transactionAlerts")}
+        />
 
-        <label className="flex items-center justify-between text-white">
-          Transaction Alerts
-
-          <input
-            type="checkbox"
-            checked={settings.transactionAlerts}
-            onChange={() => toggle("transactionAlerts")}
-          />
-        </label>
-
-        <label className="flex items-center justify-between text-white">
-          Marketing Emails
-
-          <input
-            type="checkbox"
-            checked={settings.marketingEmails}
-            onChange={() => toggle("marketingEmails")}
-          />
-        </label>
+        <Switch
+          id="marketingEmails"
+          label="Marketing Emails"
+          description="Occasional product news and tips."
+          checked={settings.marketingEmails}
+          onChange={() => toggle("marketingEmails")}
+        />
       </div>
-    </div>
+    </Card>
   );
 }
 

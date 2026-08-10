@@ -1,30 +1,28 @@
+import { Coins } from "lucide-react";
+import Card from "../ui/Card";
+import Select from "../ui/Select";
+
 function PreferenceCard({ settings, setSettings }) {
   return (
-    <div className="rounded-2xl border border-slate-700 bg-slate-800 p-6">
-      <h2 className="text-xl font-semibold text-white">
-        Preferences
-      </h2>
+    <Card id="preferences">
+      <div className="flex items-center gap-2.5">
+        <Coins size={18} className="text-accent-hover" />
+        <h2 className="text-[16px] font-semibold text-ink">Preferences</h2>
+      </div>
 
-      <p className="mt-1 text-sm text-slate-400">
-        Configure your preferred currency.
-      </p>
+      <p className="mt-2 text-sm text-ink-faint">Configure your preferred currency.</p>
 
-      <select
+      <Select
+        className="mt-5"
         value={settings.currency}
-        onChange={(e) =>
-          setSettings((prev) => ({
-            ...prev,
-            currency: e.target.value,
-          }))
-        }
-        className="mt-6 w-full rounded-xl border border-slate-700 bg-slate-900 p-3 text-white"
+        onChange={(e) => setSettings((prev) => ({ ...prev, currency: e.target.value }))}
       >
         <option value="INR">INR (₹)</option>
-        <option value="USD">$ USD</option>
-        <option value="EUR">€ EUR</option>
-        <option value="GBP">£ GBP</option>
-      </select>
-    </div>
+        <option value="USD">USD ($)</option>
+        <option value="EUR">EUR (€)</option>
+        <option value="GBP">GBP (£)</option>
+      </Select>
+    </Card>
   );
 }
 
