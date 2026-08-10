@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import { formatCurrency } from "./formatCurrency";
 
 export function generateTransactionReceipt(transaction) {
   const doc = new jsPDF();
@@ -20,7 +21,7 @@ export function generateTransactionReceipt(transaction) {
   doc.text(`Transaction ID: ${transaction._id}`, 20, y);
   y += 10;
 
-  doc.text(`Amount: ₹${transaction.amount}`, 20, y);
+  doc.text(`Amount: ${formatCurrency(transaction.amount)}`, 20, y);
   y += 10;
 
   doc.text(`Status: ${transaction.status}`, 20, y);
@@ -55,11 +56,7 @@ export function generateTransactionReceipt(transaction) {
   transaction.ledgerEntries.forEach((entry) => {
     doc.setFontSize(11);
 
-    doc.text(
-      `${entry.type} | ${entry.account.name} | ₹${entry.amount}`,
-      25,
-      y
-    );
+    doc.text(`${entry.type} | ${entry.account.name} | ${formatCurrency(entry.amount)}`, 25, y);
 
     y += 10;
   });
@@ -68,11 +65,7 @@ export function generateTransactionReceipt(transaction) {
 
   doc.setFontSize(10);
 
-  doc.text(
-    `Generated on: ${new Date().toLocaleString()}`,
-    20,
-    y
-  );
+  doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, y);
 
   y += 8;
 

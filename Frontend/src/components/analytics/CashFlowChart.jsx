@@ -64,7 +64,7 @@ function CashFlowChart({ data }) {
               tick={{ fill: "#5c6577", fontSize: 12 }}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `₹${value / 1000}k`}
+              tickFormatter={(value) => formatCurrency(value)}
               width={52}
             />
 

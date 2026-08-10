@@ -1,4 +1,4 @@
-// import { useEffect, useState } from "react"; 
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BellRing, Coins, Info, Palette } from "lucide-react";
 
@@ -12,31 +12,110 @@ import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
 import { Skeleton } from "../../components/ui/Loader";
 
-import { useSettings } from "../../context/SettingsContext";
+import { getSettings, updateSettings } from "../../services/settingsService";
+
+import { refreshCurrencyRates } from "../../utils/formatCurrency";
+
+const DEFAULT_SETTINGS = {
+  theme: "SYSTEM",
+  currency: "INR",
+  emailNotifications: true,
+  transactionAlerts: true,
+  marketingEmails: false,
+};
 
 const SECTIONS = [
-  { id: "appearance", label: "Appearance", icon: Palette },
-  { id: "preferences", label: "Preferences", icon: Coins },
-  { id: "notifications", label: "Notifications", icon: BellRing },
-  { id: "about", label: "About", icon: Info },
+  {
+    id: "appearance",
+    label: "Appearance",
+    icon: Palette,
+  },
+  {
+    id: "preferences",
+    label: "Preferences",
+    icon: Coins,
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    icon: BellRing,
+  },
+  {
+    id: "about",
+    label: "About",
+    icon: Info,
+  },
 ];
 
 function Settings() {
-  const { settings, setSettings, loading, saving, saveSettings } = useSettings();
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+
+      const response = await getSettings();
+
+      const nextSettings = {
+        ...DEFAULT_SETTINGS,
+        ...(response?.data || {}),
+      };
+
+      setSettings(nextSettings);
+
+      localStorage.setItem("ledgercore-settings", JSON.stringify(nextSettings));
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to load settings.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   const handleSave = async () => {
     try {
-      await saveSettings(settings);
+      setSaving(true);
+
+      await refreshCurrencyRates();
+
+      const response = await updateSettings(settings);
+
+      const savedSettings = {
+        ...DEFAULT_SETTINGS,
+        ...(response?.data || settings),
+      };
+
+      localStorage.setItem(
+        "ledgercore-settings",
+        JSON.stringify(savedSettings),
+      );
+
       toast.success("Settings updated successfully.");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save settings.");
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
       <PageContainer>
-        <PageHeader title="Settings" subtitle="Manage your application preferences." />
+        <PageHeader
+          title="Settings"
+          subtitle="Manage your application preferences."
+        />
+
         <div className="grid gap-6 lg:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-44 w-full" />
@@ -77,8 +156,11 @@ function Settings() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <AppearanceCard settings={settings} setSettings={setSettings} />
+
           <PreferenceCard settings={settings} setSettings={setSettings} />
+
           <NotificationCard settings={settings} setSettings={setSettings} />
+
           <AboutCard />
         </div>
       </div>
