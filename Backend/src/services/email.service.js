@@ -13,13 +13,14 @@ const transporter = nodemailer.createTransport({
 });
 
 // Verify the connection configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('Error connecting to email server:', error);
-  } else {
-    console.log('Email server is ready to send messages');
-  }
-});
+transporter.verify()
+  .then(() => {
+    console.log("✅ Gmail SMTP connection verified");
+  })
+  .catch((error) => {
+    console.error("❌ Gmail SMTP verification failed:");
+    console.error(error);
+  });
 
 
 
@@ -36,8 +37,9 @@ const sendEmail = async (to, subject, text, html) => {
 console.log(info);
     // console.log('Message sent: %s', info.messageId);
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-  } catch (error) {
-    console.error('Error sending email:', error);
+  } catch (error) {   
+      console.error("Error sending email:", error);
+      throw error;
   }
 };
 
