@@ -196,20 +196,47 @@ async function createDemoAccounts(user) {
 async function seedTransactions(accounts) {
   const savings = accounts.find((a) => a.type === "SAVINGS");
 
-  const existingTransactions = await transactionModel.countDocuments({
+  const existingTransactions = await transactionModel.find({
     $or: [
       { fromAccount: savings._id },
       { toAccount: savings._id },
     ],
   });
 
-  if (existingTransactions > 0) {
+  // Existing demo transactions found.
+  // Spread their dates across the previous 6 months
+  // instead of creating duplicate transactions.
+  if (existingTransactions.length > 0) {
+    console.log(
+      `📊 Found ${existingTransactions.length} existing demo transactions.`
+    );
+
+    for (const transaction of existingTransactions) {
+      const date = randomDate();
+
+      await transactionModel.updateOne(
+        { _id: transaction._id },
+        {
+          $set: {
+            createdAt: date,
+            updatedAt: date,
+          },
+        },
+        {
+          timestamps: false,
+        }
+      );
+    }
+
+    console.log("✅ Existing demo transactions spread across 6 months.");
+
     return;
   }
 
   const systemUser = await getSystemUser();
 
-  const { treasury, merchants } = await createMerchantAccounts(systemUser);
+  const { treasury, merchants } =
+    await createMerchantAccounts(systemUser);
 
   // Initial demo balance
   await transactionService.performTransfer(
@@ -246,7 +273,10 @@ async function seedTransactions(accounts) {
         fromAccount: savings._id,
         toAccount: merchantAccount._id,
 
-        amount: randomBetween(expense.min, expense.max),
+        amount: randomBetween(
+          expense.min,
+          expense.max
+        ),
 
         transactionType: "TRANSFER",
 
@@ -256,9 +286,12 @@ async function seedTransactions(accounts) {
 
         description: `${expense.category} Expense`,
 
-        tags: [expense.category.toLowerCase()],
+        tags: [
+          expense.category.toLowerCase(),
+        ],
 
-        idempotencyKey: `demo-expense-${i}-${Date.now()}`,
+        idempotencyKey:
+          `demo-expense-${i}-${Date.now()}`,
       },
       {
         skipBalanceCheck: true,
@@ -266,6 +299,10 @@ async function seedTransactions(accounts) {
       }
     );
   }
+
+  console.log(
+    "✅ Demo transactions seeded successfully."
+  );
 }
 
 // Entry point
