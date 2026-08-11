@@ -5,6 +5,16 @@ const tokenblackListModel = require("../models/blackList.model");
 const AppError = require("../utils/AppError");
 const sendResponse = require("../utils/sendResponse");
 
+// Cookie configuration
+const isProduction =
+  process.env.NODE_ENV === "production" || process.env.RENDER === "true";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+};
+
 /**
  * - User register controller
  * - POST /api/auth/register
@@ -28,26 +38,20 @@ async function userRegisterController(req, res) {
 
   const token = generateToken(user._id);
 
-  res.cookie("token", token);
+  res.cookie("token", token, cookieOptions);
 
   // Send registration email
   // Email failure should NOT break successful registration.
-  
+
   console.log("📧 Registration email triggered for:", user.email);
 
-try {
-  await emailService.sendRegistrationEmail(
-    user.email,
-    user.name
-  );
+  try {
+    await emailService.sendRegistrationEmail(user.email, user.name);
 
-  console.log("✅ Registration email function completed");
-} catch (error) {
-  console.error(
-    "❌ Registration email failed:",
-    error
-  );
-}
+    console.log("✅ Registration email function completed");
+  } catch (error) {
+    console.error("❌ Registration email failed:", error);
+  }
 
   sendResponse(res, 201, "User registered successfully", {
     user: {
@@ -80,7 +84,7 @@ async function userLoginController(req, res) {
 
   const token = generateToken(user._id);
 
-  res.cookie("token", token);
+  res.cookie("token", token, cookieOptions);
 
   sendResponse(res, 200, "Login successful", {
     user: {
@@ -161,7 +165,9 @@ async function userLogoutController(req, res) {
     token,
   });
 
-  res.clearCookie("token");
+  // Use the same cookie options when clearing
+  // the authentication cookie.
+  res.clearCookie("token", cookieOptions);
 
   sendResponse(res, 200, "User logged out successfully");
 }
@@ -184,4 +190,3 @@ module.exports = {
   userLogoutController,
   currentUserController,
 };
- 
