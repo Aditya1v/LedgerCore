@@ -17,9 +17,7 @@ async function loadFont(doc) {
     binary += String.fromCharCode(uint8Array[i]);
   }
 
-  const base64 = btoa(binary);
-
-  doc.addFileToVFS("NotoSans-Regular.ttf", base64);
+  doc.addFileToVFS("NotoSans-Regular.ttf", btoa(binary));
 
   doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
 
@@ -39,14 +37,9 @@ export async function generateTransactionReceipt(transaction) {
   const pageHeight = doc.internal.pageSize.getHeight();
 
   const margin = 16;
-
   const contentWidth = pageWidth - margin * 2;
 
-  const topMargin = 16;
-
-  const bottomMargin = 28;
-
-  let y = topMargin;
+  let y = 15;
 
   const formatDate = (date) => {
     if (!date) return "N/A";
@@ -69,9 +62,7 @@ export async function generateTransactionReceipt(transaction) {
   };
 
   const getAccountName = (account) => {
-    if (!account) {
-      return "N/A";
-    }
+    if (!account) return "N/A";
 
     if (typeof account === "string") {
       return account;
@@ -80,339 +71,362 @@ export async function generateTransactionReceipt(transaction) {
     return account.name || account.accountName || "N/A";
   };
 
-  const drawOuterBorder = () => {
-    doc.setDrawColor(190, 190, 190);
+  const setFont = (size, color = [35, 35, 35]) => {
+    doc.setFont("NotoSans", "normal");
 
-    doc.setLineWidth(0.5);
+    doc.setFontSize(size);
 
-    doc.roundedRect(8, 8, pageWidth - 16, pageHeight - 16, 3, 3, "S");
+    doc.setTextColor(...color);
   };
 
-  const drawDivider = () => {
-    doc.setDrawColor(205, 205, 205);
+  const drawSectionTitle = (title) => {
+    setFont(8.5, [75, 75, 75]);
+
+    doc.text(title.toUpperCase(), margin, y);
+
+    y += 3;
+
+    doc.setDrawColor(190, 190, 190);
 
     doc.setLineWidth(0.35);
 
     doc.line(margin, y, pageWidth - margin, y);
 
-    y += 7;
+    y += 6;
   };
 
-  const drawSectionHeading = (title) => {
-    y += 3;
+  const drawDetailRow = (label, value, x, valueX, width) => {
+    setFont(7.8, [105, 105, 105]);
 
-    doc.setFont("NotoSans", "normal");
+    doc.text(label, x, y);
 
-    doc.setFontSize(9);
+    setFont(8, [35, 35, 35]);
 
-    doc.setTextColor(75, 75, 75);
+    const wrapped = doc.splitTextToSize(safeText(value), width);
 
-    doc.text(title.toUpperCase(), margin, y);
-
-    y += 5;
-
-    doc.setDrawColor(180, 180, 180);
-
-    doc.setLineWidth(0.45);
-
-    doc.line(margin, y, pageWidth - margin, y);
-
-    y += 7;
+    doc.text(wrapped, valueX, y);
   };
 
-  const drawRow = (label, value, options = {}) => {
-    const { valueBold = false, labelWidth = 55 } = options;
-
-    doc.setFont("NotoSans", "normal");
-
-    doc.setFontSize(9);
-
-    doc.setTextColor(100, 100, 100);
-
-    doc.text(label, margin, y);
-
-    const valueText = safeText(value);
-
-    const valueX = margin + labelWidth;
-
-    const maxWidth = contentWidth - labelWidth;
-
-    const wrappedValue = doc.splitTextToSize(valueText, maxWidth);
-
-    doc.setFont("NotoSans", "normal");
-
-    if (valueBold) {
-      doc.setFont("NotoSans", "normal");
-    }
-
-    doc.setFontSize(9);
-
-    doc.setTextColor(35, 35, 35);
-
-    doc.text(wrappedValue, valueX, y);
-
-    y += Math.max(6, wrappedValue.length * 4.5);
-  };
-
-  const drawAccountBox = (title, account) => {
-    const boxHeight = 22;
-
-    doc.setFillColor(249, 249, 249);
+  const drawAccountBox = (title, account, x, width) => {
+    doc.setFillColor(248, 248, 248);
 
     doc.setDrawColor(210, 210, 210);
 
     doc.setLineWidth(0.4);
 
-    doc.roundedRect(margin, y, contentWidth, boxHeight, 2.5, 2.5, "FD");
+    doc.roundedRect(x, y, width, 24, 2.5, 2.5, "FD");
 
-    doc.setFont("NotoSans", "normal");
+    setFont(7, [105, 105, 105]);
 
-    doc.setFontSize(7.5);
+    doc.text(title.toUpperCase(), x + 6, y + 7);
 
-    doc.setTextColor(105, 105, 105);
+    setFont(9.5, [35, 35, 35]);
 
-    doc.text(title.toUpperCase(), margin + 6, y + 7);
+    const accountName = getAccountName(account);
 
-    doc.setFontSize(10);
-
-    doc.setTextColor(35, 35, 35);
-
-    doc.text(getAccountName(account), margin + 6, y + 15);
-
-    y += boxHeight + 6;
+    doc.text(accountName, x + 6, y + 16);
   };
 
-  const drawStatus = () => {
-    const statusText = safeText(transaction.status).toUpperCase();
+  const drawLedgerTable = () => {
+    if (
+      !Array.isArray(transaction.ledgerEntries) ||
+      transaction.ledgerEntries.length === 0
+    ) {
+      return;
+    }
 
-    const statusWidth = 31;
+    drawSectionTitle("Ledger Entries");
 
-    doc.setFillColor(235, 248, 239);
+    const tableX = margin;
+    const tableWidth = contentWidth;
 
-    doc.setDrawColor(180, 220, 190);
+    const typeWidth = 28;
+    const accountWidth = tableWidth - typeWidth - 42;
 
-    doc.roundedRect(
-      pageWidth - margin - statusWidth,
-      y - 6,
-      statusWidth,
-      9,
-      2,
-      2,
-      "FD",
-    );
+    const amountWidth = 42;
 
-    doc.setFont("NotoSans", "normal");
+    const rowHeight = 8;
 
-    doc.setFontSize(7.5);
-
-    doc.setTextColor(35, 125, 65);
-
-    doc.text(statusText, pageWidth - margin - statusWidth / 2, y, {
-      align: "center",
-    });
-  };
-
-  const drawHeader = () => {
-    doc.setFont("NotoSans", "normal");
-
-    doc.setFontSize(21);
-
-    doc.setTextColor(25, 25, 25);
-
-    doc.text("LedgerCore", margin, y);
-
-    doc.setFontSize(8);
-
-    doc.setTextColor(110, 110, 110);
-
-    doc.text("Digital Banking Ledger", margin, y + 5);
-
-    doc.setFontSize(8);
-
-    doc.setTextColor(80, 80, 80);
-
-    doc.text("TRANSACTION RECEIPT", pageWidth - margin, y, {
-      align: "right",
-    });
-
-    y += 14;
-
-    drawDivider();
-  };
-
-  const drawFooter = () => {
-    const footerY = pageHeight - 19;
+    doc.setFillColor(245, 245, 245);
 
     doc.setDrawColor(205, 205, 205);
 
-    doc.setLineWidth(0.35);
+    doc.rect(tableX, y, tableWidth, rowHeight, "FD");
 
-    doc.line(margin, footerY - 6, pageWidth - margin, footerY - 6);
+    setFont(7, [75, 75, 75]);
 
-    doc.setFont("NotoSans", "normal");
+    doc.text("TYPE", tableX + 5, y + 5);
 
-    doc.setFontSize(7);
-
-    doc.setTextColor(115, 115, 115);
+    doc.text("ACCOUNT", tableX + typeWidth + 5, y + 5);
 
     doc.text(
-      "This is an electronically generated transaction receipt.",
-      margin,
-      footerY,
-    );
-
-    doc.text("No signature is required.", margin, footerY + 4);
-
-    doc.setFontSize(7.5);
-
-    doc.setTextColor(65, 65, 65);
-
-    doc.text("LedgerCore", pageWidth - margin, footerY, {
-      align: "right",
-    });
-
-    doc.setFontSize(6.5);
-
-    doc.setTextColor(115, 115, 115);
-
-    doc.text(
-      `Generated on ${formatDate(new Date())}`,
-      pageWidth - margin,
-      footerY + 4,
+      "AMOUNT",
+      tableX + typeWidth + accountWidth + amountWidth - 5,
+      y + 5,
       {
         align: "right",
       },
     );
+
+    y += rowHeight;
+
+    transaction.ledgerEntries.forEach((entry, index) => {
+      const rowY = y;
+
+      if (index % 2 === 0) {
+        doc.setFillColor(252, 252, 252);
+
+        doc.rect(tableX, rowY, tableWidth, rowHeight, "F");
+      }
+
+      doc.setDrawColor(220, 220, 220);
+
+      doc.rect(tableX, rowY, tableWidth, rowHeight, "S");
+
+      setFont(7.5, [55, 55, 55]);
+
+      doc.text(safeText(entry.type), tableX + 5, rowY + 5);
+
+      doc.text(getAccountName(entry.account), tableX + typeWidth + 5, rowY + 5);
+
+      doc.text(
+        formatCurrency(entry.amount),
+        tableX + tableWidth - 5,
+        rowY + 5,
+        {
+          align: "right",
+        },
+      );
+
+      y += rowHeight;
+    });
+
+    y += 5;
   };
 
-  const hasSpace = (requiredHeight) => {
-    return y + requiredHeight < pageHeight - bottomMargin;
-  };
+  // Outer receipt border.
+  doc.setDrawColor(175, 175, 175);
 
-  const ensureSpace = (requiredHeight) => {
-    if (!hasSpace(requiredHeight)) {
-      drawFooter();
+  doc.setLineWidth(0.6);
 
-      doc.addPage();
+  doc.roundedRect(8, 8, pageWidth - 16, pageHeight - 16, 3, 3, "S");
 
-      y = topMargin;
+  // Header.
+  setFont(20, [25, 25, 25]);
 
-      drawOuterBorder();
-      drawHeader();
-    }
-  };
+  doc.text("LedgerCore", margin, y);
 
-  drawOuterBorder();
-  drawHeader();
+  setFont(7.5, [110, 110, 110]);
 
-  // Display the transaction status.
-  ensureSpace(20);
+  doc.text("Digital Banking Ledger", margin, y + 5);
 
-  doc.setFont("NotoSans", "normal");
+  setFont(8, [80, 80, 80]);
 
-  doc.setFontSize(11);
+  doc.text("TRANSACTION RECEIPT", pageWidth - margin, y, {
+    align: "right",
+  });
 
-  doc.setTextColor(35, 35, 35);
+  y += 12;
+
+  doc.setDrawColor(195, 195, 195);
+
+  doc.setLineWidth(0.4);
+
+  doc.line(margin, y, pageWidth - margin, y);
+
+  y += 9;
+
+  // Status row.
+  setFont(10, [35, 35, 35]);
 
   doc.text("Transaction Successful", margin, y);
 
-  drawStatus();
+  const statusWidth = 32;
 
-  y += 10;
+  doc.setFillColor(235, 248, 239);
 
-  // Highlight the transaction amount.
-  ensureSpace(40);
+  doc.setDrawColor(180, 220, 190);
 
+  doc.roundedRect(
+    pageWidth - margin - statusWidth,
+    y - 6,
+    statusWidth,
+    9,
+    2,
+    2,
+    "FD",
+  );
+
+  setFont(7, [35, 125, 65]);
+
+  doc.text(
+    safeText(transaction.status).toUpperCase(),
+    pageWidth - margin - statusWidth / 2,
+    y,
+    {
+      align: "center",
+    },
+  );
+
+  y += 9;
+
+  // Amount box.
   doc.setFillColor(248, 248, 248);
 
   doc.setDrawColor(200, 200, 200);
 
-  doc.setLineWidth(0.45);
+  doc.roundedRect(margin, y, contentWidth, 27, 3, 3, "FD");
 
-  doc.roundedRect(margin, y, contentWidth, 32, 3, 3, "FD");
+  setFont(7, [105, 105, 105]);
 
-  doc.setFont("NotoSans", "normal");
-
-  doc.setFontSize(7.5);
-
-  doc.setTextColor(105, 105, 105);
-
-  doc.text("AMOUNT", pageWidth / 2, y + 9, {
+  doc.text("AMOUNT", pageWidth / 2, y + 8, {
     align: "center",
   });
 
-  doc.setFontSize(20);
+  setFont(19, [25, 25, 25]);
 
-  doc.setTextColor(25, 25, 25);
-
-  doc.text(formatCurrency(transaction.amount), pageWidth / 2, y + 23, {
+  doc.text(formatCurrency(transaction.amount), pageWidth / 2, y + 20, {
     align: "center",
   });
 
-  y += 40;
+  y += 35;
 
-  // Transaction information.
-  ensureSpace(55);
+  // Transaction details in two columns.
+  drawSectionTitle("Transaction Details");
 
-  drawSectionHeading("Transaction Details");
+  const leftX = margin;
+  const rightX = margin + contentWidth / 2;
 
-  drawRow("Transaction ID", transaction._id);
+  const leftValueX = leftX + 30;
 
-  drawRow(
-    "Date & Time",
-    formatDate(transaction.createdAt || transaction.transactionDate),
+  const rightValueX = rightX + 30;
+
+  const columnWidth = contentWidth / 2 - 35;
+
+  drawDetailRow(
+    "Transaction ID",
+    transaction._id,
+    leftX,
+    leftValueX,
+    columnWidth,
   );
 
-  drawRow("Transaction Type", transaction.transactionType);
+  drawDetailRow(
+    "Date & Time",
+    formatDate(transaction.createdAt || transaction.transactionDate),
+    rightX,
+    rightValueX,
+    columnWidth,
+  );
 
-  drawRow("Direction", transaction.direction);
+  y += 7;
 
-  drawRow("Status", transaction.status);
+  drawDetailRow(
+    "Type",
+    transaction.transactionType,
+    leftX,
+    leftValueX,
+    columnWidth,
+  );
 
-  if (transaction.category) {
-    drawRow("Category", transaction.category);
-  }
+  drawDetailRow(
+    "Direction",
+    transaction.direction,
+    rightX,
+    rightValueX,
+    columnWidth,
+  );
 
-  // Source and destination accounts.
-  ensureSpace(65);
+  y += 7;
 
-  drawSectionHeading("Account Details");
+  drawDetailRow(
+    "Category",
+    transaction.category || "N/A",
+    leftX,
+    leftValueX,
+    columnWidth,
+  );
 
-  drawAccountBox("From Account", transaction.fromAccount);
+  drawDetailRow("Status", transaction.status, rightX, rightValueX, columnWidth);
 
-  drawAccountBox("To Account", transaction.toAccount);
+  y += 9;
 
-  // Optional transaction description.
+  // Account details.
+  drawSectionTitle("Account Details");
+
+  const gap = 7;
+
+  const accountBoxWidth = (contentWidth - gap) / 2;
+
+  drawAccountBox(
+    "From Account",
+    transaction.fromAccount,
+    margin,
+    accountBoxWidth,
+  );
+
+  drawAccountBox(
+    "To Account",
+    transaction.toAccount,
+    margin + accountBoxWidth + gap,
+    accountBoxWidth,
+  );
+
+  y += 30;
+
+  // Payment details.
   if (transaction.description) {
-    ensureSpace(35);
+    drawSectionTitle("Payment Details");
 
-    drawSectionHeading("Payment Details");
+    drawDetailRow(
+      "Description",
+      transaction.description,
+      margin,
+      margin + 35,
+      contentWidth - 35,
+    );
 
-    drawRow("Description", transaction.description);
+    y += 9;
   }
 
-  // Display ledger entries without allowing them to overlap the footer.
-  if (
-    Array.isArray(transaction.ledgerEntries) &&
-    transaction.ledgerEntries.length
-  ) {
-    ensureSpace(20 + transaction.ledgerEntries.length * 12);
+  // Ledger entries.
+  drawLedgerTable();
 
-    drawSectionHeading("Ledger Entries");
+  // Footer.
+  const footerY = pageHeight - 20;
 
-    transaction.ledgerEntries.forEach((entry) => {
-      ensureSpace(14);
+  doc.setDrawColor(205, 205, 205);
 
-      const accountName = getAccountName(entry.account);
+  doc.setLineWidth(0.35);
 
-      const amount = formatCurrency(entry.amount);
+  doc.line(margin, footerY - 6, pageWidth - margin, footerY - 6);
 
-      drawRow(safeText(entry.type), `${accountName} — ${amount}`);
-    });
-  }
+  setFont(6.5, [115, 115, 115]);
 
-  // Place the footer only after all content has been rendered.
-  drawFooter();
+  doc.text(
+    "This is an electronically generated transaction receipt.",
+    margin,
+    footerY,
+  );
+
+  doc.text("No signature is required.", margin, footerY + 4);
+
+  setFont(7, [65, 65, 65]);
+
+  doc.text("LedgerCore", pageWidth - margin, footerY, {
+    align: "right",
+  });
+
+  setFont(6, [115, 115, 115]);
+
+  doc.text(
+    `Generated on ${formatDate(new Date())}`,
+    pageWidth - margin,
+    footerY + 4,
+    {
+      align: "right",
+    },
+  );
 
   doc.save(`LedgerCore_Transaction_${transaction._id}.pdf`);
 }
