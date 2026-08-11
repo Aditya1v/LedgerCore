@@ -30,6 +30,25 @@ async function userRegisterController(req, res) {
 
   res.cookie("token", token);
 
+  // Send registration email
+  // Email failure should NOT break successful registration.
+  
+  console.log("📧 Registration email triggered for:", user.email);
+
+try {
+  await emailService.sendRegistrationEmail(
+    user.email,
+    user.name
+  );
+
+  console.log("✅ Registration email function completed");
+} catch (error) {
+  console.error(
+    "❌ Registration email failed:",
+    error
+  );
+}
+
   sendResponse(res, 201, "User registered successfully", {
     user: {
       _id: user._id,
@@ -38,8 +57,6 @@ async function userRegisterController(req, res) {
     },
     token,
   });
-
-  await emailService.sendRegistrationEmail(user.email, user.name);
 }
 
 /**
@@ -111,6 +128,7 @@ async function updateProfileController(req, res) {
  */
 async function changePasswordController(req, res) {
   console.log(req.body);
+
   const { currentPassword, newPassword } = req.body;
 
   const user = await userModel.findById(req.user._id).select("+password");
@@ -133,14 +151,15 @@ async function changePasswordController(req, res) {
  * - POST /api/auth/logout
  */
 async function userLogoutController(req, res) {
-  const token =
-    req.cookies.token || req.headers.authorization?.split(" ")[1];
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     throw new AppError("User is not logged in", 400);
   }
 
-  await tokenblackListModel.create({ token });
+  await tokenblackListModel.create({
+    token,
+  });
 
   res.clearCookie("token");
 
@@ -154,12 +173,7 @@ async function userLogoutController(req, res) {
 async function currentUserController(req, res) {
   res.set("Cache-Control", "no-store");
 
-  return sendResponse(
-    res,
-    200,
-    "Current user fetched successfully",
-    req.user
-  );
+  return sendResponse(res, 200, "Current user fetched successfully", req.user);
 }
 
 module.exports = {
@@ -170,3 +184,4 @@ module.exports = {
   userLogoutController,
   currentUserController,
 };
+ 

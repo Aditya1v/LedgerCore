@@ -1,77 +1,231 @@
-require('dotenv').config();
-const nodemailer = require('nodemailer');
+require("dotenv").config();
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user: process.env.EMAIL_USER,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN,
-  },
-});
+const { Resend } = require("resend");
 
-// Verify the connection configuration
-transporter.verify()
-  .then(() => {
-    console.log("✅ Gmail SMTP connection verified");
-  })
-  .catch((error) => {
-    console.error("❌ Gmail SMTP verification failed:");
-    console.error(error);
-  });
+const resend = new Resend(process.env.RESEND_API_KEY);
 
+const FROM_EMAIL = process.env.EMAIL_FROM;
 
-
-// Function to send email
-const sendEmail = async (to, subject, text, html) => {
+async function sendEmail({ to, subject, html, text }) {
   try {
-    const info = await transporter.sendMail({
-      from: `"Banking Ledger" <${process.env.EMAIL_USER}>`, // sender address
-      to, // list of receivers
-      subject, // Subject line
-      text, // plain text body
-      html, // html body
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html,
+      text,
     });
-console.log(info);
-    // console.log('Message sent: %s', info.messageId);
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-  } catch (error) {   
-      console.error("Error sending email:", error);
-      throw error;
+
+    if (error) {
+      console.error("❌ Resend email error:", error);
+      throw new Error(error.message || "Email sending failed");
+    }
+
+    console.log(`✅ Email sent to ${to}: ${data.id}`);
+
+    return data;
+  } catch (error) {
+    console.error(`❌ Failed to send email to ${to}:`, error);
+
+    throw error;
   }
-};
-
-async function sendRegistrationEmail(userEmail , name){
-  
-  const subject = 'Welcome to Banking Ledger';
-  const text = `Hello ${name}, \n\n Thank you for registration at Banking Ledger, We're exicited to have you in board!\n\nBest regards,\nThe Banking Ledger Team`;
-  const html = `<p>Hello ${name},</p><p>Thank you for registring at Banking Ledger, We're excited to have you on board!</p><p>Best regards,<br> The Banking Ledger Team</p>`
-
-  await sendEmail(userEmail,subject,text, html)
 }
 
-async function sendTransactionEmail(userEmail, name , amount, toAccount){
-  const subject = 'Transaction Successful!';
-  const text = `Hello ${name}, \n\n A transaction of amount ${amount} has been made to account ${toAccount}.\n\nBest regards,\nThe Banking Ledger Team`;
-  const html = `<p>Hello ${name},</p><p>A transaction of amount ${amount} has been made to account ${toAccount}.</p><p>Best regards,<br> The Banking Ledger Team</p>`
+/**
+ * Registration email
+ */
+async function sendRegistrationEmail(email, name) {
+  return sendEmail({
+    to: email,
 
-  await sendEmail(userEmail,subject,text, html)
+    subject: "Welcome to LedgerCore 🎉",
+
+    html: `
+      <div style="
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 0 auto;
+        color: #18181b;
+      ">
+
+        <h2>
+          Welcome to LedgerCore, ${name}!
+        </h2>
+
+        <p>
+          Your LedgerCore account has been
+          created successfully.
+        </p>
+
+        <p>
+          You can now manage your accounts,
+          track transactions, and monitor
+          your finances securely.
+        </p>
+
+        <div style="
+          margin: 24px 0;
+          padding: 16px;
+          background: #f4f4f5;
+          border-radius: 10px;
+        ">
+          <strong>
+            Registration successful
+          </strong>
+
+          <br />
+
+          Your account is ready to use.
+        </div>
+
+        <p>
+          Thanks for choosing LedgerCore.
+        </p>
+
+        <p>
+          — LedgerCore Team
+        </p>
+
+      </div>
+    `,
+
+    text: `
+Welcome to LedgerCore, ${name}!
+
+Your LedgerCore account has been created successfully.
+
+You can now manage your accounts, track transactions,
+and monitor your finances securely.
+
+Thanks for choosing LedgerCore.
+
+— LedgerCore Team
+    `,
+  });
 }
 
-async function sendTransactionFailedEmail(userEmail, name , amount, toAccount){
-  const subject = 'Transaction Failed!';
-  const text = `Hello ${name}, \n\n A transaction of amount ${amount} to account ${toAccount} has failed.\n\nBest regards,\nThe Banking Ledger Team`;
-  const html = `<p>Hello ${name},</p><p>A transaction of amount ${amount} to account ${toAccount} has failed.</p><p>Best regards,<br> The Banking Ledger Team</p>`
+/**
+ * Transaction email
+ */
+async function sendTransactionEmail({
+  email,
+  name,
+  amount,
+  direction,
+  description,
+  transactionId,
+}) {
+  const action = direction === "IN" ? "received" : "sent";
 
-  await sendEmail(userEmail,subject,text, html)
+  return sendEmail({
+    to: email,
+
+    subject:
+      direction === "IN"
+        ? "Money received — LedgerCore"
+        : "Transaction successful — LedgerCore",
+
+    html: `
+      <div style="
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 0 auto;
+        color: #18181b;
+      ">
+
+        <h2>
+          Transaction successful
+        </h2>
+
+        <p>
+          Hi ${name},
+        </p>
+
+        <p>
+          Your LedgerCore account has
+          successfully ${action} a transaction.
+        </p>
+
+        <div style="
+          margin: 24px 0;
+          padding: 20px;
+          background: #f4f4f5;
+          border-radius: 12px;
+        ">
+
+          <p style="margin: 0 0 8px;">
+            <strong>Amount</strong>
+          </p>
+
+          <p style="
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0 0 16px;
+          ">
+            ₹${Number(amount).toLocaleString("en-IN")}
+          </p>
+
+          ${
+            description
+              ? `
+                <p style="margin: 0 0 8px;">
+                  <strong>Description</strong>
+                </p>
+
+                <p style="margin: 0 0 16px;">
+                  ${description}
+                </p>
+              `
+              : ""
+          }
+
+          ${
+            transactionId
+              ? `
+                <p style="margin: 0;">
+                  <strong>Transaction ID:</strong>
+                  ${transactionId}
+                </p>
+              `
+              : ""
+          }
+
+        </div>
+
+        <p>
+          If you did not authorize this transaction,
+          please review your LedgerCore account
+          immediately.
+        </p>
+
+        <p>
+          — LedgerCore Team
+        </p>
+
+      </div>
+    `,
+
+    text: `
+Hi ${name},
+
+Your LedgerCore account has successfully ${action} a transaction.
+
+Amount: ₹${Number(amount).toLocaleString("en-IN")}
+
+${description ? `Description: ${description}` : ""}
+
+${transactionId ? `Transaction ID: ${transactionId}` : ""}
+
+If you did not authorize this transaction,
+please review your LedgerCore account immediately.
+
+— LedgerCore Team
+    `,
+  });
 }
-
-
 
 module.exports = {
+  sendEmail,
   sendRegistrationEmail,
   sendTransactionEmail,
-  sendTransactionFailedEmail 
 };
