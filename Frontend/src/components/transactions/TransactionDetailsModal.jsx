@@ -44,7 +44,7 @@ function TransactionDetailsModal({ isOpen, onClose, transaction, loading }) {
             size="sm"
             variant="secondary"
             icon={Download}
-            onClick={() => generateTransactionReceipt(transaction)}
+            onClick={async () => await generateTransactionReceipt(transaction)}
           >
             Receipt
           </Button>
