@@ -301,7 +301,7 @@ async function seedTransactions(accounts) {
 
       toAccount: savings._id,
 
-      amount: 100000,
+      amount: 500000,
 
       transactionType: "DEPOSIT",
 
