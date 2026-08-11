@@ -1,29 +1,48 @@
 require("dotenv").config();
 
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Create a Gmail SMTP transporter using the App Password.
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
 
-const FROM_EMAIL = process.env.EMAIL_FROM;
+// Verify the Gmail SMTP connection when needed.
+async function verifyEmailService() {
+  try {
+    await transporter.verify();
 
+    console.log("✅ Gmail SMTP connection verified successfully");
+
+    return true;
+  } catch (error) {
+    console.error("❌ Gmail SMTP verification failed:");
+
+    console.error(error);
+
+    return false;
+  }
+}
+
+// Send an email using the configured Gmail account.
 async function sendEmail({ to, subject, html, text }) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: [to],
+    const info = await transporter.sendMail({
+      from: `"LedgerCore" <${process.env.EMAIL_USER}>`,
+      to,
       subject,
       html,
       text,
     });
 
-    if (error) {
-      console.error("❌ Resend email error:", error);
-      throw new Error(error.message || "Email sending failed");
-    }
+    console.log(`✅ Email sent to ${to}`);
+    console.log(`📧 Message ID: ${info.messageId}`);
 
-    console.log(`✅ Email sent to ${to}: ${data.id}`);
-
-    return data;
+    return info;
   } catch (error) {
     console.error(`❌ Failed to send email to ${to}:`, error);
 
@@ -31,13 +50,10 @@ async function sendEmail({ to, subject, html, text }) {
   }
 }
 
-/**
- * Registration email
- */
+// Send an email after a user successfully registers.
 async function sendRegistrationEmail(email, name) {
   return sendEmail({
     to: email,
-
     subject: "Welcome to LedgerCore 🎉",
 
     html: `
@@ -45,11 +61,31 @@ async function sendRegistrationEmail(email, name) {
         font-family: Arial, sans-serif;
         max-width: 600px;
         margin: 0 auto;
+        padding: 24px;
         color: #18181b;
       ">
 
+        <div style="
+          text-align: center;
+          margin-bottom: 30px;
+        ">
+          <h1 style="
+            margin: 0;
+            font-size: 28px;
+          ">
+            LedgerCore
+          </h1>
+
+          <p style="
+            margin-top: 8px;
+            color: #71717a;
+          ">
+            Your personal financial ledger
+          </p>
+        </div>
+
         <h2>
-          Welcome to LedgerCore, ${name}!
+          Welcome to LedgerCore, ${name}! 🎉
         </h2>
 
         <p>
@@ -57,26 +93,26 @@ async function sendRegistrationEmail(email, name) {
           created successfully.
         </p>
 
+        <div style="
+          margin: 24px 0;
+          padding: 20px;
+          background: #f4f4f5;
+          border-radius: 12px;
+        ">
+          <strong>
+            Registration Successful
+          </strong>
+
+          <p style="margin-bottom: 0;">
+            Your account is ready to use.
+          </p>
+        </div>
+
         <p>
           You can now manage your accounts,
           track transactions, and monitor
           your finances securely.
         </p>
-
-        <div style="
-          margin: 24px 0;
-          padding: 16px;
-          background: #f4f4f5;
-          border-radius: 10px;
-        ">
-          <strong>
-            Registration successful
-          </strong>
-
-          <br />
-
-          Your account is ready to use.
-        </div>
 
         <p>
           Thanks for choosing LedgerCore.
@@ -104,9 +140,7 @@ Thanks for choosing LedgerCore.
   });
 }
 
-/**
- * Transaction email
- */
+// Send an email when money is received or sent.
 async function sendTransactionEmail({
   email,
   name,
@@ -130,11 +164,31 @@ async function sendTransactionEmail({
         font-family: Arial, sans-serif;
         max-width: 600px;
         margin: 0 auto;
+        padding: 24px;
         color: #18181b;
       ">
 
+        <div style="
+          text-align: center;
+          margin-bottom: 30px;
+        ">
+          <h1 style="
+            margin: 0;
+            font-size: 28px;
+          ">
+            LedgerCore
+          </h1>
+
+          <p style="
+            margin-top: 8px;
+            color: #71717a;
+          ">
+            Transaction Notification
+          </p>
+        </div>
+
         <h2>
-          Transaction successful
+          Transaction Successful
         </h2>
 
         <p>
@@ -228,4 +282,5 @@ module.exports = {
   sendEmail,
   sendRegistrationEmail,
   sendTransactionEmail,
+  verifyEmailService,
 };
