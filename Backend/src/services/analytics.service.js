@@ -11,7 +11,7 @@ async function getAnalytics(user) {
 
   const accountIds = accounts.map((account) => account._id);
 
-  const [monthlyData, transactionStats, categorySpending,] = await Promise.all([
+  const [monthlyData, transactionStats, categorySpending] = await Promise.all([
     // Monthly Data
     transactionModel.aggregate([
       {
@@ -37,7 +37,9 @@ async function getAnalytics(user) {
           month: {
             $dateToString: {
               format: "%Y-%m",
-              date: "$createdAt",
+              date: {
+                $ifNull: ["$transactionDate", "$createdAt"],
+              },
             },
           },
           amount: 1,
@@ -128,7 +130,7 @@ async function getAnalytics(user) {
     ]),
 
     //Category-wise Spending
-     transactionModel.aggregate([
+    transactionModel.aggregate([
       {
         $match: {
           fromAccount: { $in: accountIds },
