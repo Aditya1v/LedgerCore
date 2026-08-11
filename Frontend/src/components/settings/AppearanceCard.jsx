@@ -5,7 +5,7 @@ import Card from "../ui/Card";
 
 const THEMES = [
   { value: "LIGHT", label: "Light", description: "Bright interface", icon: Sun },
-  { value: "DARK", label: "Dark", description: "Fintech dark mode", icon: Moon },
+  { value: "DARK", label: "Dark", description: "Dark interface", icon: Moon },
   { value: "SYSTEM", label: "System", description: "Follow device setting", icon: Monitor },
 ];
 
