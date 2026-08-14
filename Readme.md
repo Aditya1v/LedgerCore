@@ -376,8 +376,4 @@ There is currently **no automated test suite** in this repository — the backen
 Licensed under the **MIT License** — see [`LICENSE`](./LICENSE) for the full text. You're free to use, modify, and distribute this project, including commercially, with attribution.
 
 ### Acknowledgments
-
-- UI design direction inspired by [takeuforward.org](https://takeuforward.org/)
-- Icons by [Lucide](https://lucide.dev/)
-- Charts by [Recharts](https://recharts.org/)
 - Built and maintained by **Aditya Verma**
